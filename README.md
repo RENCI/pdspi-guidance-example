@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/RENCI/pdspi-mapper-example.svg?branch=master)](https://travis-ci.com/RENCI/pdspi-mapper-example)
+[![Build Status](https://travis-ci.com/RENCI/pdspi-guidance-example.svg?branch=master)](https://travis-ci.com/RENCI/pdspi-guidance-example)
 
 # pdspi-guidance-example
 

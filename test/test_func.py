@@ -1,14 +1,16 @@
-import sys
 import requests
+
 
 json_headers = {
     "Accept": "application/json"
 }
 
+
 json_post_headers = {
     "Content-Type": "application/json",
     "Accept": "application/json"
 }
+
 
 config = {
     "title": "Aminoglycoside dosing guidance",
@@ -43,6 +45,7 @@ config = {
         "why": "BMI is used to calculate the creatinine clearance. Dosing is higher for patients with higher BMI"
     }]
 }
+
 
 guidance = {
     "piid": "pdspi-aminoglycoside-nomogram",
@@ -112,7 +115,6 @@ guidance = {
 }
 
 
-
 guidance_input = {
     "piid": "pdspi-guidance-example",
     "ptid": "38",
@@ -135,11 +137,10 @@ guidance_input = {
     } ]
 }
 
+
 def test_guidance():
     resp = requests.post("http://pdspi-guidance-example:8080/guidance", headers=json_post_headers, json=guidance_input)
 
-    print(resp.content)
-    sys.stdout.flush()
     assert resp.status_code == 200
     assert resp.json() == guidance
     
