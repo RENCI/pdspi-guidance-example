@@ -1,7 +1,7 @@
 version: '3.4'
 services:
   
-  pdspi-example:
+  pdspi-guidance-example:
     build:
       context: .
     restart: always

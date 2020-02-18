@@ -1,12 +1,12 @@
 version: '3.4'
 services:
   
-  pdspi-example-test:
+  pdspi-guidance-example-test:
     build:
       context: test
-    command: []
+    command: ["-s", "-vv", "-x"]
     depends_on:
-      - pdspi-example
+      - pdspi-guidance-example
 
 
 
