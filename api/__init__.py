@@ -34,7 +34,7 @@ config = {
 
 
 guidance = {
-    "piid": "pdspi-aminoglycoside-nomogram",
+    "piid": "pdspi-guidance-example",
     "title": "Aminoglycoside dosing guidance",
     "txid": "38-1",
     "justification": [
