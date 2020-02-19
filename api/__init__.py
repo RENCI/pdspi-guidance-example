@@ -1,6 +1,6 @@
 config = {
     "title": "Aminoglycoside dosing guidance",
-    "piid": "pdspi-aminoglycoside-nomogram",
+    "piid": "pdspi-guidance-example",
     "pluginType": "g",
     "pluginSelectors": [ {
         "title": "Drug",
@@ -37,23 +37,6 @@ guidance = {
     "piid": "pdspi-guidance-example",
     "title": "Aminoglycoside dosing guidance",
     "txid": "38-1",
-    "justification": [
-        {
-            "id": "LOINC:30525-0",
-            "title": "Age",
-            "how": "The value was specified by the end user.",
-            "why": "Age is used to calculate the creatinine clearance. Dosing is lower for geriatric patient and contraindicated for pediatric patients",
-            "variableValue": {
-                "value": "0.5",
-                "units": "years"
-            },
-            "legalValues": {
-                "type": "number",
-                "minimum": "0"
-            },
-            "timestamp": "2020-02-18T18:54:57.099Z"
-        }
-    ],
     "vizOutputs": [
         {
             "survival": "(x,y),...",
@@ -104,6 +87,23 @@ guidance = {
 def get_config():
     return config
 
+whys = {
+    "LOINC:30525-0": "Age is used to calculate the creatinine clearance. Dosing is lower for geriatric patient and contraindicated for pediatric patients",
+    "LOINC:39156-5": "BMI is used to calculate the creatinine clearance. Dosing is higher for patients with higher BMI"
+}
 
-def get_guidance():
-    return guidance
+def get_guidance(body):
+    return {
+        **guidance,
+        "justification": [
+            {
+                "id": var["id"],
+                "title": var["title"],
+                "how": var["how"],
+                "why": whys[var["id"]],
+                "variableValue": var["variableValue"],
+                "legalValues": var.get("legalValues", next(filter(lambda rpv: rpv["id"] == var["id"], config["requiredPatientVariables"]))["legalValues"]),
+                "timestamp": var.get("timestamp", "2020-02-18T18:54:57.099Z")
+            } for var in body["userSuppliedPatientVariables"]
+        ]
+    }

@@ -14,7 +14,7 @@ json_post_headers = {
 
 config = {
     "title": "Aminoglycoside dosing guidance",
-    "piid": "pdspi-aminoglycoside-nomogram",
+    "piid": "pdspi-guidance-example",
     "pluginType": "g",
     "pluginSelectors": [ {
         "title": "Drug",
@@ -48,7 +48,7 @@ config = {
 
 
 guidance = {
-    "piid": "pdspi-aminoglycoside-nomogram",
+    "piid": "pdspi-guidance-example",
     "title": "Aminoglycoside dosing guidance",
     "txid": "38-1",
     "justification": [
@@ -65,7 +65,18 @@ guidance = {
                 "type": "number",
                 "minimum": "0"
             },
-            "timestamp": "2020-02-18T18:54:57.099Z"
+            "timestamp": "2019-12-03T13:41:09.942+00:00"
+        }, {
+            "how": "The value was specified by the end user.",
+            "id": "LOINC:39156-5",
+            "title": "BMI",
+            "legalValues": { "type": "number", "minimum": "0" },
+            "why": "BMI is used to calculate the creatinine clearance. Dosing is higher for patients with higher BMI",
+            "variableValue": {
+                "value": "0.5",
+                "units": "kg/m^2"
+            },
+            "timestamp": "2019-12-03T13:41:09.942+00:00"
         }
     ],
     "vizOutputs": [
@@ -131,6 +142,15 @@ guidance_input = {
         "variableValue": {
             "value": "0.5",
             "units": "years"
+        },
+        "how": "The value was specified by the end user.",
+        "timestamp": "2019-12-03T13:41:09.942+00:00"
+    }, {
+        "id": "LOINC:39156-5",
+        "title": "BMI",
+        "variableValue": {
+            "value": "0.5",
+            "units": "kg/m^2"
         },
         "how": "The value was specified by the end user.",
         "timestamp": "2019-12-03T13:41:09.942+00:00"
