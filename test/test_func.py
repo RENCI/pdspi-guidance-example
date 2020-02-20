@@ -158,8 +158,45 @@ guidance_input = {
 }
 
 
+guidance_input_title_optional = {
+    "piid": "pdspi-guidance-example",
+    "ptid": "38",
+    "timestamp": "2019-12-03T13:41:09.942+00:00",
+    "pluginParameterValues": [ {
+        "id": "pdspi-guidance-example:1",
+        "title": "Extended interval nomogram",
+        "parameterDescription": "This calculator uses one of four extended-interval nomograms. Please choose one nomogram.",
+        "parameterValue": { "value": "Hartford" }
+    } ],
+    "userSuppliedPatientVariables": [ {
+        "id": "LOINC:30525-0",
+        "variableValue": {
+            "value": "0.5",
+            "units": "years"
+        },
+        "how": "The value was specified by the end user.",
+        "timestamp": "2019-12-03T13:41:09.942+00:00"
+    }, {
+        "id": "LOINC:39156-5",
+        "variableValue": {
+            "value": "0.5",
+            "units": "kg/m^2"
+        },
+        "how": "The value was specified by the end user.",
+        "timestamp": "2019-12-03T13:41:09.942+00:00"
+    } ]
+}
+
+
 def test_guidance():
     resp = requests.post("http://pdspi-guidance-example:8080/guidance", headers=json_post_headers, json=guidance_input)
+
+    assert resp.status_code == 200
+    assert resp.json() == guidance
+    
+
+def test_guidance_title_optional():
+    resp = requests.post("http://pdspi-guidance-example:8080/guidance", headers=json_post_headers, json=guidance_input_title_optional)
 
     assert resp.status_code == 200
     assert resp.json() == guidance

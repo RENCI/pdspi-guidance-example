@@ -87,22 +87,19 @@ guidance = {
 def get_config():
     return config
 
-whys = {
-    "LOINC:30525-0": "Age is used to calculate the creatinine clearance. Dosing is lower for geriatric patient and contraindicated for pediatric patients",
-    "LOINC:39156-5": "BMI is used to calculate the creatinine clearance. Dosing is higher for patients with higher BMI"
-}
-
 def get_guidance(body):
+    def extract(var, attr):
+        return var.get(attr, next(filter(lambda rpv: rpv["id"] == var["id"], config["requiredPatientVariables"]))[attr])
     return {
         **guidance,
         "justification": [
             {
                 "id": var["id"],
-                "title": var["title"],
+                "title": extract(var, "title"),
                 "how": var["how"],
-                "why": whys[var["id"]],
+                "why": extract(var, "why"),
                 "variableValue": var["variableValue"],
-                "legalValues": var.get("legalValues", next(filter(lambda rpv: rpv["id"] == var["id"], config["requiredPatientVariables"]))["legalValues"]),
+                "legalValues": extract(var, "legalValues"),
                 "timestamp": var.get("timestamp", "2020-02-18T18:54:57.099Z")
             } for var in body["userSuppliedPatientVariables"]
         ]
