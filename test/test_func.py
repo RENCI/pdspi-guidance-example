@@ -190,16 +190,24 @@ guidance_input_title_optional = {
 
 def test_guidance():
     resp = requests.post("http://pdspi-guidance-example:8080/guidance", headers=json_post_headers, json=guidance_input)
-
+    resp_output = resp.json()
     assert resp.status_code == 200
-    assert resp.json() == guidance
+    assert "piid" in resp_output
+    assert "title" in resp_output
+    assert "justification" in resp_output
+    assert "cards" in resp_output
+    assert "vizOutputs" in resp_output
     
 
 def test_guidance_title_optional():
     resp = requests.post("http://pdspi-guidance-example:8080/guidance", headers=json_post_headers, json=guidance_input_title_optional)
-
+    resp_output = resp.json()
     assert resp.status_code == 200
-    assert resp.json() == guidance
+    assert "piid" in resp_output
+    assert "title" in resp_output
+    assert "justification" in resp_output
+    assert "cards" in resp_output
+    assert "vizOutputs" in resp_output
     
 
 def test_config():
