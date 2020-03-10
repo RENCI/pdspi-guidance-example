@@ -25,7 +25,7 @@ def generate_multi_time_series_data(n, m):
     data = []
     seed(1)
     for i in range(m):
-        group = "group " + i
+        group = 'group {}'.format(i)
         for j in range(n):
             if j == 0:
                 y = _get_random(0, 1)
@@ -57,7 +57,7 @@ def generate_multi_scatter_plot_data(n, m):
     data = []
     seed(1)
     for i in range(m):
-        group = 'group ' + i
+        group = 'group {}'.format(i)
         a = _get_random(-1, 1)
         b = _get_random(0, 1)
         for j in range(n):
