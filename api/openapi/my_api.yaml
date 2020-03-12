@@ -643,8 +643,6 @@ components:
                   type: string
                   description: "type of the data field to bind for visualization"
                   example: "nominal"
-
-
     Source:
       type: object
       required:

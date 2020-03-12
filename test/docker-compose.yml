@@ -7,8 +7,8 @@ services:
     command: ["-s", "-vv", "-x"]
     depends_on:
       - pdspi-guidance-example
+      - pdspi-test-pds-server
 
-
-
-    
-    
+  pdspi-test-pds-server:
+    build:
+      context: test/pds-server-mock

@@ -1,13 +1,13 @@
+import os
 import requests
 
 from api.utils import generate_time_series_data, generate_multi_time_series_data, generate_scatter_plot_data, \
     generate_multi_scatter_plot_data, generate_histogram_data
 
 
-json_post_headers = {
-    "Content-Type": "application/json",
-    "Accept": "application/json"
-}
+pds_host = os.environ["PDS_HOST"]
+pds_port = os.environ["PDS_PORT"]
+pds_version = os.environ["PDS_VERSION"]
 
 config = {
     "title": "Aminoglycoside dosing guidance",
@@ -90,12 +90,18 @@ guidance = {
 
 
 def generate_vis_spec(typeid, x_axis_title, y_axis_title):
+    json_post_headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
     vega_spec_input = {
         "typeid": typeid,
         "x_axis_title": x_axis_title,
         "y_axis_title": y_axis_title
     }
-    resp = requests.post("http://tx-vis:8080/vega_spec", headers=json_post_headers, json=vega_spec_input)
+    url_str = "http://{}:{}/{}/plugin/tx-vis/vega_spec".format(pds_host, pds_port, pds_version)
+    resp = requests.post(url_str, headers=json_post_headers, json=vega_spec_input)
+    # resp = requests.post("http://tx-vis:8080/vega_spec", headers=json_post_headers, json=vega_spec_input)
     if resp.status_code == 200:
         return resp.json()
     else:
