@@ -5,9 +5,9 @@ from api.utils import generate_time_series_data, generate_multi_time_series_data
     generate_multi_scatter_plot_data, generate_histogram_data
 
 
-pds_host = os.environ["PDS_HOST"]
-pds_port = os.environ["PDS_PORT"]
-pds_version = os.environ["PDS_VERSION"]
+pds_host = os.getenv("PDS_HOST", "localhost")
+pds_port = os.getenv("PDS_PORT", "8080")
+pds_version = os.getenv("PDS_VERSION", "v1")
 
 config = {
     "title": "Aminoglycoside dosing guidance",
