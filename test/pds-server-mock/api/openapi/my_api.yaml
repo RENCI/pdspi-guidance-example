@@ -306,7 +306,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Card'
-        vizOutputs:
+        outputs:
           type: array
           items:
             $ref: '#/components/schemas/Output'

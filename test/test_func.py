@@ -51,40 +51,45 @@ guidance = {
     "piid": "pdspi-guidance-example",
     "title": "Aminoglycoside dosing guidance",
     "txid": "38-1",
-    "justification": [
-        {
-            "id": "LOINC:30525-0",
-            "title": "Age",
-            "how": "The value was specified by the end user.",
-            "why": "Age is used to calculate the creatinine clearance. Dosing is lower for geriatric patient and contraindicated for pediatric patients",
-            "variableValue": {
-                "value": "0.5",
-                "units": "years"
-            },
-            "legalValues": {
-                "type": "number",
-                "minimum": "0"
-            },
-            "timestamp": "2019-12-03T13:41:09.942+00:00"
-        }, {
-            "how": "The value was specified by the end user.",
-            "id": "LOINC:39156-5",
-            "title": "BMI",
-            "legalValues": { "type": "number", "minimum": "0" },
-            "why": "BMI is used to calculate the creatinine clearance. Dosing is higher for patients with higher BMI",
-            "variableValue": {
-                "value": "0.5",
-                "units": "kg/m^2"
-            },
-            "timestamp": "2019-12-03T13:41:09.942+00:00"
-        }
-    ],
-    "vizOutputs": [
-        {
-            "survival": "(x,y),...",
-            "pkpd": "(x,y),..."
-        }
-    ],
+    "justification": {
+        "input": [
+            {
+                "id": "LOINC:30525-0",
+                "title": "Age",
+                "how": "The value was specified by the end user.",
+                "why": "Age is used to calculate the creatinine clearance. Dosing is lower for geriatric patient and contraindicated for pediatric patients",
+                "variableValue": {
+                    "value": "0.5",
+                    "units": "years"
+                },
+                "legalValues": {
+                    "type": "number",
+                    "minimum": "0"
+                },
+                "timestamp": "2019-12-03T13:41:09.942+00:00"
+            }, {
+                "how": "The value was specified by the end user.",
+                "id": "LOINC:39156-5",
+                "title": "BMI",
+                "legalValues": { "type": "number", "minimum": "0" },
+                "why": "BMI is used to calculate the creatinine clearance. Dosing is higher for patients with higher BMI",
+                "variableValue": {
+                    "value": "0.5",
+                    "units": "kg/m^2"
+                },
+                "timestamp": "2019-12-03T13:41:09.942+00:00"
+            }
+        ],
+        "outputs": [
+            {
+                "id": "oid-1",
+                "name": "Time-series data",
+                "description": "Information about time-series data",
+                "data": [],
+                "specs": []
+            }
+        ]
+    },
     "cards": [
         {
             "id": "string",
@@ -195,9 +200,10 @@ def test_guidance():
     assert "piid" in resp_output
     assert "title" in resp_output
     assert "justification" in resp_output
+    assert "inputs" in resp_output["justification"]
+    assert "outputs" in resp_output["justification"]
     assert "cards" in resp_output
-    assert "vizOutputs" in resp_output
-    
+
 
 def test_guidance_title_optional():
     resp = requests.post("http://pdspi-guidance-example:8080/guidance", headers=json_post_headers, json=guidance_input_title_optional)
@@ -206,9 +212,10 @@ def test_guidance_title_optional():
     assert "piid" in resp_output
     assert "title" in resp_output
     assert "justification" in resp_output
+    assert "inputs" in resp_output["justification"]
+    assert "outputs" in resp_output["justification"]
     assert "cards" in resp_output
-    assert "vizOutputs" in resp_output
-    
+
 
 def test_config():
     resp = requests.get("http://pdspi-guidance-example:8080/config", headers=json_headers)

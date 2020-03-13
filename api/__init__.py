@@ -169,16 +169,18 @@ def get_guidance(body):
         return var.get(attr, next(filter(lambda rpv: rpv["id"] == var["id"], config["requiredPatientVariables"]))[attr])
     return {
         **guidance,
-        "justification": [
-            {
-                "id": var["id"],
-                "title": extract(var, "title"),
-                "how": var["how"],
-                "why": extract(var, "why"),
-                "variableValue": var["variableValue"],
-                "legalValues": extract(var, "legalValues"),
-                "timestamp": var.get("timestamp", "2020-02-18T18:54:57.099Z")
-            } for var in body["userSuppliedPatientVariables"]
-        ],
-        "vizOutputs": generate_vis_outputs()
+        "justification": {
+            "inputs": [
+                {
+                    "id": var["id"],
+                    "title": extract(var, "title"),
+                    "how": var["how"],
+                    "why": extract(var, "why"),
+                    "variableValue": var["variableValue"],
+                    "legalValues": extract(var, "legalValues"),
+                    "timestamp": var.get("timestamp", "2020-02-18T18:54:57.099Z")
+                } for var in body["userSuppliedPatientVariables"]
+            ],
+            "outputs": generate_vis_outputs()
+        }
     }

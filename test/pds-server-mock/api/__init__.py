@@ -71,13 +71,11 @@ vega_spec_output = {
 }
 
 guidance = {
-    "title" : "guidance title",
+    "title": "guidance title",
     "id": "guidance id",
     "justification": {},
     "cards": [
     ],
-    "vizOutputs": [
-    ]
 }
 
 phenotypes = {
