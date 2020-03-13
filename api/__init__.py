@@ -115,7 +115,7 @@ def generate_vis_outputs():
             "name": "Time-series data",
             "description": "Information about time-series data",
             "data": generate_time_series_data(50),
-            "specIds": [
+            "specs": [
                 generate_vis_spec("line_chart", "X Axis", "Y Axis"),
                 generate_vis_spec("area_chart", "X Axis", "Y Axis")
             ]
@@ -125,7 +125,7 @@ def generate_vis_outputs():
             "name": "Multiple time-series data",
             "description": "Information about multiple time-series data",
             "data": generate_multi_time_series_data(50, 3),
-            "specIds": [
+            "specs": [
                 generate_vis_spec("multiple_line_chart", "X Axis", "Y Axis")
             ]
         },
@@ -134,7 +134,7 @@ def generate_vis_outputs():
             "name": "Scatter plot data",
             "description": "Information about scatter plot data",
             "data": generate_scatter_plot_data(100),
-            "specIds": [
+            "specs": [
                 generate_vis_spec("scatter_plot", "X Axis", "Y Axis")
             ]
         },
@@ -143,7 +143,7 @@ def generate_vis_outputs():
             "name": "Multiple class scatter plot data",
             "description": "Information about multiple class scatter plot data",
             "data": generate_multi_scatter_plot_data(100, 2),
-            "specIds": [
+            "specs": [
                 generate_vis_spec("multiple_scatter_plot", "X Axis", "Y Axis")
             ]
         },
@@ -152,7 +152,7 @@ def generate_vis_outputs():
             "name": "Histogram data",
             "description": "Information about histogram data",
             "data": generate_histogram_data(100),
-            "specIds": [
+            "specs": [
                 generate_vis_spec("histogram", "X Axis", "Y Axis")
             ]
         }
