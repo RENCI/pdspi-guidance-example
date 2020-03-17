@@ -524,26 +524,12 @@ components:
           type: array
           description: "data to be visualized"
           items:
-            $ref: '#/components/schemas/DataItem'
+            type: object
         specs:
           type: array
           description: "Vega-lite spec used for guidance visualization"
           items:
             $ref: '#/components/schemas/Spec'
-    DataItem:
-      type: object
-      required:
-        - x
-      properties:
-        x:
-          type: number
-          description: "data point value that can be used to plot for x axis"
-        y:
-          type: number
-          description: "data point value that can be used to plot for y axis"
-        group:
-          type: string
-          description: "groups of data points in which different groups can be plotted differently, e.g., different groups can be plotted with different colors."
     Spec:
       type: object
       required:
