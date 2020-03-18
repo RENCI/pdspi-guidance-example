@@ -89,7 +89,7 @@ guidance = {
 }
 
 
-def generate_vis_spec(typeid, x_axis_title, y_axis_title):
+def generate_vis_spec(typeid, x_axis_title, y_axis_title, chart_title, chart_desc):
     json_post_headers = {
         "Content-Type": "application/json",
         "Accept": "application/json"
@@ -97,7 +97,9 @@ def generate_vis_spec(typeid, x_axis_title, y_axis_title):
     vega_spec_input = {
         "typeid": typeid,
         "x_axis_title": x_axis_title,
-        "y_axis_title": y_axis_title
+        "y_axis_title": y_axis_title,
+        "chart_title": chart_title,
+        "chart_description": chart_desc
     }
     url_str = "http://{}:{}/{}/plugin/tx-vis/vega_spec".format(pds_host, pds_port, pds_version)
     resp = requests.post(url_str, headers=json_post_headers, json=vega_spec_input)
@@ -116,8 +118,8 @@ def generate_vis_outputs():
             "description": "Information about time-series data",
             "data": generate_time_series_data(50),
             "specs": [
-                generate_vis_spec("line_chart", "X Axis", "Y Axis"),
-                generate_vis_spec("area_chart", "X Axis", "Y Axis")
+                generate_vis_spec("line_chart", "X Axis", "Y Axis", "Line chart", "Time-series line chart"),
+                generate_vis_spec("area_chart", "X Axis", "Y Axis", "Area chart", "Time-series area chart")
             ]
         },
         {
@@ -126,7 +128,8 @@ def generate_vis_outputs():
             "description": "Information about multiple time-series data",
             "data": generate_multi_time_series_data(50, 3),
             "specs": [
-                generate_vis_spec("multiple_line_chart", "X Axis", "Y Axis")
+                generate_vis_spec("multiple_line_chart", "X Axis", "Y Axis", "Multiple line chart",
+                                  "Multiple time-series line chart")
             ]
         },
         {
@@ -135,7 +138,7 @@ def generate_vis_outputs():
             "description": "Information about scatter plot data",
             "data": generate_scatter_plot_data(100),
             "specs": [
-                generate_vis_spec("scatter_plot", "X Axis", "Y Axis")
+                generate_vis_spec("scatter_plot", "X Axis", "Y Axis", "Scatter plot", "Two dimensional scatter plot")
             ]
         },
         {
@@ -144,7 +147,8 @@ def generate_vis_outputs():
             "description": "Information about multiple class scatter plot data",
             "data": generate_multi_scatter_plot_data(100, 2),
             "specs": [
-                generate_vis_spec("multiple_scatter_plot", "X Axis", "Y Axis")
+                generate_vis_spec("multiple_scatter_plot", "X Axis", "Y Axis", "Multi-class scatter plot",
+                                  "Two dimensional scatter plot with multiple classes")
             ]
         },
         {
@@ -153,7 +157,7 @@ def generate_vis_outputs():
             "description": "Information about histogram data",
             "data": generate_histogram_data(100),
             "specs": [
-                generate_vis_spec("histogram", "X Axis", "Y Axis")
+                generate_vis_spec("histogram", "X Axis", "Y Axis", "Histogram", "Histogram of counts")
             ]
         }
     ]
