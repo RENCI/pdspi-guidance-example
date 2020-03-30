@@ -84,7 +84,7 @@ def generate_histogram_data(n):
     return data
 
 
-def generate_dosing_data(p_weight=None):
+def generate_dosing_data(p_age=None, p_weight=None, p_bmi=None):
     pds_host = os.getenv("PDS_HOST", "localhost")
     pds_port = os.getenv("PDS_PORT", "8080")
     pds_version = os.getenv("PDS_VERSION", "v1")
@@ -94,15 +94,19 @@ def generate_dosing_data(p_weight=None):
     }
 
     if p_weight:
-        vd = 0.3 * p_weight
+        vd = 0.3 * float(p_weight)
     else:
         vd = _get_random(22, 25)
 
+    if p_weight and p_age:
+        cr_cl = ((140 - float(p_age)) * float(p_weight))/(72 * 1.56)
+    else:
+        cr_cl = _get_random(29.3516, 63.4812)
     seed()
     post_input = {
         "dose": _get_random(120, 240),
         "tau": int(_get_random(8, 16)),
-        "cr_cl":  _get_random(29.3516, 63.4812),
+        "cr_cl":  cr_cl,
         "t_infusion": 0.5,
         "vd": vd,
         "num_cycles": int(_get_random(4, 8))

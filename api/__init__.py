@@ -36,6 +36,11 @@ config = {
         "legalValues": { "type": "number", "minimum": "0" },
         "why": "Age is used to calculate the creatinine clearance. Dosing is lower for geriatric patient and contraindicated for pediatric patients"
     }, {
+        "id": "LOINC:29463-7",
+        "title": "Weight",
+        "legalValues": { "type": "number", "minimum": "0" },
+        "why": "Weight is used to calculate the creatinine clearance. Dosing is higher for patients with higher weight"
+    }, {
         "id": "LOINC:39156-5",
         "title": "BMI",
         "legalValues": { "type": "number", "minimum": "0" },
@@ -110,7 +115,7 @@ def generate_vis_spec(typeid, x_axis_title, y_axis_title, chart_title, chart_des
         return {}
 
 
-def generate_vis_outputs():
+def generate_vis_outputs(age=None, weight=None, bmi=None):
     outputs = [
         {
             "id": "oid-1",
@@ -164,7 +169,7 @@ def generate_vis_outputs():
             "id": "oid-6",
             "name": "Dosing data",
             "description": "Information about dosing data",
-            "data": generate_dosing_data(),
+            "data": generate_dosing_data(p_age=age, p_weight=weight, p_bmi=bmi),
             "specs": [
                 generate_vis_spec("area_chart", "Time (hours)", "Concentration (mcg/mL)", "Plot of dosing data",
                                   "Plot of Aminoglycoside concentration graph over time")
@@ -181,20 +186,31 @@ def get_config():
 def get_guidance(body):
     def extract(var, attr):
         return var.get(attr, next(filter(lambda rpv: rpv["id"] == var["id"], config["requiredPatientVariables"]))[attr])
+
+    inputs = []
+    age = None
+    weight = None
+    bmi = None
+    for var in body["userSuppliedPatientVariables"]:
+        if var['id'] == 'LOINC:30525-0':
+            age = var["variableValue"]['value']
+        elif var['id'] == 'LOINC:29463-7':
+            weight = var["variableValue"]['value']
+        elif var['id'] == 'LOINC:39156-5':
+            bmi = var["variableValue"]['value']
+        inputs.append({
+            "id": var["id"],
+            "title": extract(var, "title"),
+            "how": var["how"],
+            "why": extract(var, "why"),
+            "variableValue": var["variableValue"],
+            "legalValues": extract(var, "legalValues"),
+            "timestamp": var.get("timestamp", "2020-02-18T18:54:57.099Z")
+        })
     return {
         **guidance,
         "justification": {
-            "inputs": [
-                {
-                    "id": var["id"],
-                    "title": extract(var, "title"),
-                    "how": var["how"],
-                    "why": extract(var, "why"),
-                    "variableValue": var["variableValue"],
-                    "legalValues": extract(var, "legalValues"),
-                    "timestamp": var.get("timestamp", "2020-02-18T18:54:57.099Z")
-                } for var in body["userSuppliedPatientVariables"]
-            ],
-            "outputs": generate_vis_outputs()
+            "inputs": inputs,
+            "outputs": generate_vis_outputs(age=age, weight=weight, bmi=bmi)
         }
     }

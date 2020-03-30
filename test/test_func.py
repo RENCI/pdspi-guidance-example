@@ -39,6 +39,11 @@ config = {
         "legalValues": { "type": "number", "minimum": "0" },
         "why": "Age is used to calculate the creatinine clearance. Dosing is lower for geriatric patient and contraindicated for pediatric patients"
     }, {
+        "id": "LOINC:29463-7",
+        "title": "Weight",
+        "legalValues": { "type": "number", "minimum": "0" },
+        "why": "Weight is used to calculate the creatinine clearance. Dosing is higher for patients with higher weight"
+    }, {
         "id": "LOINC:39156-5",
         "title": "BMI",
         "legalValues": { "type": "number", "minimum": "0" },
