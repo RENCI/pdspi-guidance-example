@@ -2,7 +2,7 @@ import os
 import requests
 
 from api.utils import generate_time_series_data, generate_multi_time_series_data, generate_scatter_plot_data, \
-    generate_multi_scatter_plot_data, generate_histogram_data
+    generate_multi_scatter_plot_data, generate_histogram_data, generate_dosing_data
 
 
 pds_host = os.getenv("PDS_HOST", "localhost")
@@ -158,6 +158,16 @@ def generate_vis_outputs():
             "data": generate_histogram_data(100),
             "specs": [
                 generate_vis_spec("histogram", "X Axis", "Y Axis", "Histogram", "Histogram of counts")
+            ]
+        },
+        {
+            "id": "oid-6",
+            "name": "Dosing data",
+            "description": "Information about dosing data",
+            "data": generate_dosing_data(),
+            "specs": [
+                generate_vis_spec("area_chart", "Time (hours)", "Concentration (mcg/mL)", "Plot of dosing data",
+                                  "Plot of Aminoglycoside concentration graph over time")
             ]
         }
     ]

@@ -1,3 +1,5 @@
+import os
+import requests
 from random import seed, random
 
 
@@ -80,3 +82,34 @@ def generate_histogram_data(n):
             'x': x
         })
     return data
+
+
+def generate_dosing_data(p_weight=None):
+    pds_host = os.getenv("PDS_HOST", "localhost")
+    pds_port = os.getenv("PDS_PORT", "8080")
+    pds_version = os.getenv("PDS_VERSION", "v1")
+    json_post_headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+
+    if p_weight:
+        vd = 0.3 * p_weight
+    else:
+        vd = _get_random(22, 25)
+
+    seed()
+    post_input = {
+        "dose": _get_random(120, 240),
+        "tau": int(_get_random(8, 16)),
+        "cr_cl":  _get_random(29.3516, 63.4812),
+        "t_infusion": 0.5,
+        "vd": vd,
+        "num_cycles": int(_get_random(4, 8))
+    }
+    url_str = "http://{}:{}/{}/plugin/tx-generator-dosing/concentration_data".format(pds_host, pds_port, pds_version)
+    resp = requests.post(url_str, headers=json_post_headers, json=post_input)
+    if resp.status_code == 200:
+        return resp.json()
+    else:
+        return []
