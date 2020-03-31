@@ -99,14 +99,14 @@ def generate_dosing_data(p_age=None, p_weight=None, p_bmi=None):
         vd = _get_random(22, 25)
 
     if p_weight and p_age:
-        cr_cl = ((140 - float(p_age)) * float(p_weight))/(72 * 1.56)
+        crcl = ((140 - float(p_age)) * float(p_weight))/(72 * 1.56)
     else:
-        cr_cl = _get_random(29.3516, 63.4812)
+        crcl = _get_random(29.3516, 63.4812)
     seed()
     post_input = {
         "dose": _get_random(120, 240),
         "tau": int(_get_random(8, 16)),
-        "cr_cl":  cr_cl,
+        "crcl":  crcl,
         "t_infusion": 0.5,
         "vd": vd,
         "num_cycles": int(_get_random(4, 8))
