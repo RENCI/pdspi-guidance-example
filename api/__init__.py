@@ -171,7 +171,7 @@ def generate_vis_outputs(age=None, weight=None, bmi=None):
             "description": "Information about dosing data",
             "data": generate_dosing_data(p_age=age, p_weight=weight, p_bmi=bmi),
             "specs": [
-                generate_vis_spec("area_chart", "Time (hours)", "Concentration (mcg/mL)", "Plot of dosing data",
+                generate_vis_spec("dosing_plot", "Time (hours)", "Concentration (mcg/mL)", "Plot of dosing data",
                                   "Plot of Aminoglycoside concentration graph over time")
             ]
         }
