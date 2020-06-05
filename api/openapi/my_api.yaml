@@ -447,14 +447,7 @@ components:
               description: provide justifications for inputs related to patient variables
               type: array
               items:
-                type: object
-                required:
-                  - id
-                  - how
-                  - why
-                  - variableValue
-                properties:
-                  $ref: '#/components/schemas/PatientVariableValue/properties'
+                $ref: '#/components/schemas/PatientVariableValue'
             outputs:
               type: array
               items:
