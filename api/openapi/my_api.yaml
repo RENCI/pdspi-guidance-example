@@ -279,7 +279,7 @@ components:
       description: "Returns guidance, justification, visualization data and data type, as well as cds-hooks compatible formats for direct integration with the EHR."
       type: object
       required:
-        - piid
+        - txid
         - inputs
         - cards
       properties:
