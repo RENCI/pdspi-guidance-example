@@ -279,21 +279,25 @@ components:
       description: "Returns guidance, justification, visualization data and data type, as well as cds-hooks compatible formats for direct integration with the EHR."
       type: object
       required:
-        - txid
+        - piid
         - inputs
         - cards
       properties:
         piid:
-          description: "A string, unique to this deployment, used to identify this plugin in realtime"
+          description: "A string, uniquely identifies the enabled and installed plugin in this deployment, used to identify this plugin in realtime for retriving guidance."
           type: string
           example: "pdspi-aminoglycoside-nomogram"
+        ptid:
+          description: "The ID of the patient for which guidance is required. If not specified, depend only on userSuppliedPatientVariables"
+          type: string
+          example: "smart-7321938"
         title:
           description: "An optional title for the guidance plugin"
           type: string
           example: "Aminoglycoside dosing guidance"
         txid:
           type: string
-          description: "The transaction id sent in the GuidanceInputs. If none were sent, a unique id will be created and sent back here."
+          description: "The transaction id sent in the Guidance. If none were sent, a unique id will be created and sent back here."
           example: "38-1"
         inputs:
           type: object
@@ -304,24 +308,26 @@ components:
           items:
             $ref: '#/components/schemas/Settings'
         cards:
+          description: "Set of suggested actions, per the CDS-Hooks standard"
           type: array
           items:
             $ref: '#/components/schemas/Card'
         specs:
+          description: "Vega-lite spec used for guidance visualization"
           type: array
           items:
             $ref: '#/components/schemas/Spec'
         timeout:
-          type: integer
           description: "Number of milliseconds until time out. Factory system default should be 120000 (2 minutes) for RUO applictions, and only 500ms for clinical."
+          type: integer
         fhir_piid:
+          description: "Uniquely identifies the enabled and installed plugin to use for mapper"
           type: string
           example: "pdspi-fhir-example"
-          description: "Uniquely identifies the enabled and installed plugin to use for mapper"
         mapper_piid:
+          description: "Uniquely identifies the enabled and installed plugin to use for fhir"
           type: string
           example: "pdspi-mapper-example"
-          description: "Uniquely identifies the enabled and installed plugin to use for fhir"
     Settings:
       type: object
       properties:
