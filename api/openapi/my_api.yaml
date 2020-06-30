@@ -23,43 +23,64 @@ paths:
                 $ref: '#/components/schemas/Config'
               example:
                 {
-                    "title": "Aminoglycoside dosing guidance",
-                    "piid": "pdspi-aminoglycoside-nomogram",
-                    "pluginType": "g",
-                    "pluginSelectors": [ {
-                        "title": "Drug",
-                        "id": "dosing.rxCUI",
-                        "selectorValue": {
-                            "value": "rxCUI:1596450",
-                            "title": "Gentamicin" }
-                    } ],
-                    "pluginParameterDefaults": [ {
-                        "id": "pdspi-guidance-example:1",
-                        "title": "Extended interval nomogram",
-                        "parameterDescription": "This calculator uses one of four extended-interval nomograms. Please choose one nomogram.",
-                        "parameterValue": { "value": "Hartford" },
-                        "legalValues": {
-                            "type": "string",
-                            "enum": [ "Hartford", "Urban-Craig", "Conventional A", "Conventional B" ] }
-                    } ],
-                    "requiredPatientVariables": [ {
-                        "id": "LOINC:30525-0",
-                        "title": "Age",
-                        "legalValues": { "type": "number", "minimum": "0" },
-                        "why": "Age is used to calculate the creatinine clearance. Dosing is lower for geriatric patient and contraindicated for pediatric patients"
-                    },
-                    {
-                      "id": "LOINC:29463-7",
-                      "title": "Weight",
-                      "legalValues": { "type": "number", "minimum": "0" },
-                      "why": "Weight is used to calculate the creatinine clearance. Dosing is higher for patients with higher weight"
-                    },
-                    {
-                        "id": "LOINC:39156-5",
-                        "title": "BMI",
-                        "legalValues": { "type": "number", "minimum": "0" },
-                        "why": "BMI is used to calculate the creatinine clearance. Dosing is higher for patients with higher BMI"
-                    }]
+                    "title": "DOAC variable mapper",
+                    "piid": "pdspi-mapper-DOAC",
+                    "pluginType": "m",
+                    "settingsDefaults": {
+                      "pluginSelectors": [ {
+                          "title": "FHIR URI - an URL (locator) or an URN (unique name)",
+                          "selectorValue": {
+                              "value": "http://hapi.fhir.org/baseR4",
+                              "title": "Happy FHIR base url" }
+                        }
+                      ],
+                      "modelParameters": [ 
+                        {
+                          "id": "current-time",
+                          "parameterDescription": "Compute variables relevant to this timestamp.",
+                          "parameterValue": { "value": "2019-09-20T00:00:01Z" },
+                          "legalValues": { "type": "string", "format": "time-stamp" }
+                        }
+                      ],
+                      "patientVariables": [
+                        {
+                          "id": "LOINC:30525-0",
+                          "title": "Age",
+                          "variableDescription": "Fractional age of patient relative to [current-time].",
+                          "legalValues": { "type": "number", "minimum": "0" },
+                        },
+                        {
+                          "id": "1114195.extant",
+                          "title": "Rivoroxaban, extant",
+                          "variableDescription": "Dosing of rivoroxaban, based on the finding of any rxnorm codes found on the record that map to rxCUI 1114195.",
+                          "legalValues": { "type": "number" } 
+                        },
+                        {
+                          "id": "1114195.intensity",
+                          "title": "Rivoroxaban, dosage",
+                          "variableDescription": "Dosing of rivoroxaban.",
+                          "legalValues": { "type": "number", "minimum": 0  } 
+                        },
+                        {
+                          "id": "HP:0001892.extant.days",
+                          "title": "Bleeding, days since",
+                          "variableDescription": "Days since the last bleeding event, relative to current-time. A value < -age means never. Bleeding events are identified by one of 50 ICD10 codes or 42 ICD9 codes.",
+                          "legalValues": { "type": "number" } 
+                        },
+                        {
+                          "id": "HP:0000077.extant.boolean",
+                          "title": "Kidney dysfunction, extant",
+                          "variableDescription": "If true, then Kidney dysfunction was found in the record for the patient, relative to current-time.",
+                          "legalValues": { "type": "boolean" },
+                        },
+                        {
+                          "id": "1114195.extant.count",
+                          "title": "Rivoroxaban dosing count",
+                          "variableDescription": "Number of times patient was dosed with Rivoroxaban.",
+                          "legalValues": { "type": "number" } 
+                        },
+                      ]
+                    }
                 }
         '400':
           description: "Bad Request"
@@ -109,7 +130,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GuidanceInputs'
+              $ref: '#/components/schemas/Guidance'
             example:
               { "piid": "pdspi-guidance-example",
               "ptid": "38",
@@ -225,198 +246,41 @@ components:
         action:
           type: string
           example: "Arbitrarily chose this FHIR server from those available: (pdspi-fhir-example). Only one FHIR server is available that is also compatible with pdspi-mapper-example"
-    PatientVariableValue:
-      type: object
-      required:
-        - id
-        - variableValue
-        - how
-      properties:
-        id:
-          type: string
-          description: "The id for one of the patient variables supported by this PDS version. If the client does not recognize this id, it should 1) log a warning, 2) not solicit user input for the id, 3) attempt to render the value, and 4) attempt to render the 'how' and 'why' for this unknown variable in the justification section of the client interface, assuming there is one."
-          example: "LOINC:30525-0"
-        title:
-          type: string
-          description: "A non-standardized, human-readable string to describe the patient variable indicated by this id. The 'title' may be implemented by the PDS to aid in debugging, and clients should not depend on this value. The client should have prior knowledge of the supported patient variables, and thus should provide it's own human-readable titles for representation on any end-user interfaces in the appropriate language."
-          example: "Age"
-        variableValue:
-          type: object
-          description: "The patient variable id maps to only one RequiredPatientVariable, which in turn, defines all the legal values (legalValues) for this id. The legalValues defines the type for the variableValue, and so can be used to inform the client on how to render the variableValue. The client can find the type by calling the '/config' endpoint, matching the 'id' with that in the 'RequiredPatientVariable' schema, and looking up 'legalValues'. The variableValue may also include the 'units' field, which is optional, and if left off, implies the system default units. NOTE: The 'variableValue' is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user."
-          example: {"value": "0.5", "units": "years"}
-        certitude:
-          type: integer
-          description: "The certitude of the value, 0 not certain, 1 somewhat certain, 2 certain. Defaults to 0, if absent"
-          example: 2
-        how:
-          type: string
-          description: "A value such as 'The value was specified by the end user.' indicates that any value in the EHR has been overriden by the client via the input values to the endpoint, and they will be simply passed back here."
-          example: "The value was specified by the end user."
-        timestamp:
-          description: "If absent, defaults to current time."
-          type: string
-          format: date-time
-          example: "2019-12-03T13:41:09.942+00:00"
     Config:
       type: object
       required:
         - piid
         - pluginType
-        - requiredPatientVariables
       properties:
-        title:
-          type: string
-          description: "Meaningful name for this plugin"
-          example: "Aminoglycoside dosing guidance"
         piid:
           type: string
           description: "A string, unique to this deployment, used to identify this plugin in realtime"
-          example: "pdspi-aminoglycoside-nomogram"
-        pluginType:
+          example: "pdspi-mapper-DOAC"
+        title:
           type: string
-          enum: [e,g,m,mD,f,fD]
-          description: "A value from the enumeration below identifying the plugin type. 'g'=Guidance, 'c'=convenience, 'm'=mapper, 'f'=FHIR data server, 'mD'= default mapper, 'fD'=default FHIR server. In the clinical arena, only one FHIR server and only one mapper is allowed, and this can be indicated either with the defaults, or by only installing one mapper and one FHIR plugin type."
-          example: "g"
-        pluginTypeTitle:
-          type: string
-          description: "A human-readable value for the type. 'g'=Guidance, 'c'=Convenience, 'm'=Mapping, 'f'=FHIR, 'mD'=Default Mapping plugin, 'fD'=Default FHIR plugin"
+          description: "Meaningful name for this plugin"
+          example: "DOAC variable mapper"
         pluginDependencies:
           type: array
           items:
             type: string
             description: "An array of container names upon which the plugin in question depends. For example, 'txscience/pds-fhir-example:0.2.0'. Mapper plugins must indicate a dependency on one or more FHIR plugins, but dependencies are discouraged otherwise in order to maintain the decoupling and reuse of plugins. Every plugin of type 'm' and 'mD' must have at least one 'f' or 'fD' plugin listed in pluginDependencies, otherwise return 500."
-        pluginSelectors:
-          description: "Maps the piid to a set of selector values. Optionally call the /selectors endpoint first to get the full list of available selectors and their legal values. For example, two selectors might be 1. drug type and 2. indication. If the client selects values for the selector that matches all piid selector values, then this plugin can provide guidance. Potentially, a decision tree could be implemented here by prefacing each selectorarray item with logic, but for this API version we will instead always AND all the selector array elements. For example, 'if guidance is requried for drug _x_ AND indication _y_ then use plugin _z_'."
-          type: array
-          items:
-            $ref: '#/components/schemas/Selector'
-        pluginParameterDefaults:
-          description: "Default, typed values for any parameters that might be required by the plugin"
-          type: array
-          items:
-            $ref: '#/components/schemas/PluginParameter'
-        requiredPatientVariables:
-          type: array
-          items:
-            $ref: '#/components/schemas/RequiredPatientVariable'
-    PluginParameter:
-      type: object
-      required:
-        - id
-        - parameterValue
-      properties:
-        id:
+        pluginType:
           type: string
-          description: "The id for one of the parameters used by the plugin in question. Parameters are completely defined by the plugin and need not be interchangable with other plugins. The client will have no prior knowledge for plugin parameters."
-          example: "pdspi-guidance-example:1"
-        title: 
+          enum: [e,g,m,mD,f,fD]
+          description: "A value from the enumeration below identifying the plugin type. 'g'=Guidance, 'c'=convenience, 'm'=mapper, 'f'=FHIR data server, 'mD'= default mapper, 'fD'=default FHIR server. In the clinical arena, only one FHIR server and only one mapper is allowed, and this can be indicated either with the defaults, or by only installing one mapper and one FHIR plugin type."
+          example: "m"
+        pluginTypeTitle:
           type: string
-          description: "A non-standardized, human-readable string to describe the id. May be implemented by the PDS to aid in debugging, clients should not depend on this value."
-          example: "Extended interval nomogram"
-        parameterDescription:
-          type: string
-          description: "Description provided by the plugin. The plugin, not the client, is therefore responsible for converting the descriptions to the appropriate language based on internationalization and personalization preferences."
-          example: "This calculator uses one of four extended-interval nomograms. Please choose one nomogram."
-        parameterValue:
-          type: object
-          description: "The actual value of the parameter. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user."
-          example: {"value": "Hartford"}
-        legalValues:
-          type: string
-          description: "The 'legalValues' will always be present in the '/config' endpoint response and need not be provided to or from the client in the '/guidance' endpoint call. Use the JSON schema, https://json-schema.org/draft/2019-09/json-schema-validation.html. For example, { type: 'string', 'enum': [ 'Gentamicin', 'Amikacin' ] } to define an enumeration,  { 'type': 'number' } for a float, and { 'type': 'number', 'minimum': '0' } for a positive number, and { 'type': 'integer' } for an integer. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user. "
-          example: { "type": "string", "enum": ["Hartford", "Urban-Craig", "Conventional A", "Conventional B"] }
-    RequiredPatientVariable:
-      type: object
-      required:
-        - id
-        - legalValues
-        - why
-      properties:
-        id:
-          type: string
-          description: "The id for one of the patient variables supported by this PDS version. The client has the option of ignoring this variable if it doesn't recognize the id."
-          example: "LOINC:30525-0"
-        title:
-          type: string
-          description: "A non-standardized, human-readable string to describe the id. May be implemented by the PDS to aid in debugging, clients should not depend on this value. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user."
-          example: "Age"
-        legalValues:
-          type: string
-          description: "If absent, all values are legal, so treat the value like a string. Use the JSON schema, https://json-schema.org/draft/2019-09/json-schema-validation.html. For example, { type: 'string', 'enum': [ 'Gentamicin', 'Amikacin' ] } to define an enumeration,  { 'type': 'number' } for a float, and { 'type': 'number', 'minimum': '0' } for a positive number, and { 'type': 'integer' } for an integer. The client should have prior knowledge of the supported patient variables, and thus should provide it's own human-readable titles for representation on any end-user interfaces in the appropriate language. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user. "
-          example: { "type": "number", "minimum": "0" }
-        why:
-          type: string
-          description: "Provides the client with a human-readable, non-standard justification for why the plugin needs this particular variable. This can be rendered by the client to provide the end-user with rationale for the patient values, but does not address how the value was computed."
-          example: "Age is used to calculate the creatinine clearance. Dosing is lower for geriatric patient and contraindicated for pediatric patients"
-    Selector:
-      description: "Used for selecting plugins"
-      type: object
-      required:
-        - id
-      properties:
-        title:
-          type: string
-          example: "Drug"
-          description: "Human-readable name for this selector type."
-        id:
-          type: string
-          description: "The client should have prior knowledge of the full list of selectors available with this version of the PDS. This id is used to determine which selector type is described."
-          example: "dosing.rxCUI"
-        selectorValue:
-          type: object
-          description: "Unique identifier for this type. Stylistically, community standard coding system used for this type will preface the code used, e.g., rxCUI:1596450. If no standard exists 'PDS:<id>' will be used. The 'title' property illustrated in the example is optional and might be used by the PDS for debugging purposes. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user. "
-          example: {"value": "rxCUI:1596450", "title": "Gentamicin"}
-        legalValues:
-          type: string
-          description: "If absent, all values are legal, so treat the value like a string. Use the JSON schema, https://json-schema.org/draft/2019-09/json-schema-validation.html. For example, { type: 'string', 'enum': [ 'Gentamicin', 'Amikacin' ] } to define an enumeration,  { 'type': 'number' } for a float, and { 'type': 'number', 'minimum': '0' } for a positive number, and { 'type': 'integer' } for an integer. Furthermore, a non-standard 'title' can be added in support of a human-readable string for the type's value. This maybe be implemented by the PDS to aid in debugging, however clients should not depend on this value. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user."
-          example: { "type": "string", "enum": [{"value": "rxCUI:1596450", "title": "Gentamicin"},{"value": "rxCUI:1114195"},{"value": "rxCUI:1546356"},{"value": "rxCUI:1364430"},{"value": "rxCUI:1599538"},{"value": "rxCUI:1927851"}] }
-    GuidanceInputs:
-      type: object
-      required:
-        - piid
-      properties:
-        piid:
-          type: string
-          example: "pdspi-guidance-example"
-          description: "Uniquely identifies the enabled and installed plugin to use for retrieving guidance"
-        txid:
-          description: "A unique id that the client is ue to track this transaction. If specified, it will be returned in the Guidance, if not specified, a unique ID will be created."  
-          type: string
-          example: "38-1"
-        timeout:
-          type: integer
-          description: "Number of milliseconds until time out. Factory system default should be 120000 (2 minutes) for RUO applictions, and only 500ms for clinical."
-        timestamp:
-          description: "If not specified, use current time"
-          type: string
-          format: date-time
-          example: "2019-12-03T13:41:09.942+00:00"
-        pluginParameterValues:
-          description: "User-supplied parameter values to override plugin defaults"
-          type: array
-          items:
-            $ref: '#/components/schemas/PluginParameter'
-        userSuppliedPatientVariables:
-          description: "User-supplied patient values to override EHR values, and/or replace values missing in the EHR"
-          type: array
-          items:
-            $ref: '#/components/schemas/PatientVariableValue'
-          example:  [ {
-              "id": "LOINC:30525-0",
-              "title": "Age",
-              "variableValue": {
-                "value": ".5",
-                "units": "years"
-              },
-              "how": "The value was specified by the end user.",
-              "timestamp": "2019-12-03T13:41:09.942+00:00"
-            } ]
+          description: "A human-readable value for the type. 'g'=Guidance, 'c'=Convenience, 'm'=Mapping, 'f'=FHIR, 'mD'=Default Mapping plugin, 'fD'=Default FHIR plugin"
+        settingsDefaults:
+            $ref: '#/components/schemas/Settings'
     Guidance:
       description: "Returns guidance, justification, visualization data and data type, as well as cds-hooks compatible formats for direct integration with the EHR."
       type: object
       required:
         - txid
-        - justification
+        - inputs
         - cards
       properties:
         piid:
@@ -431,57 +295,145 @@ components:
           type: string
           description: "The transaction id sent in the GuidanceInputs. If none were sent, a unique id will be created and sent back here."
           example: "38-1"
-        justification:
-          description: "Lists patient variables that were used and how they were computed and why they were needed. Justification informs expert user on whether or not to trust this guidance. Justification is provided both by the guidance plugin, which describes 'why' it needs each patient variable, and by the mapper plugin, which describes 'how' each patient variable was derived."
+        inputs:
           type: object
-          properties:
-            inputs:
-              description: provide justifications for inputs related to patient variables
-              type: array
-              items:
-                type: object
-                required:
-                  - id
-                  - how
-                  - why
-                  - variableValue
-                properties:
-                  id:
-                    description: "The id for one of the patient variables supported by this PDS version. If the client does not recognize this id, it should 1) log a warning, 2) not solicit user input for the id, 3) attempt to render the value, and 4) attempt to render the 'how' and 'why' for this unknown variable in the justification section of the client interface, assuming there is one."
-                    type: string
-                    example: "LOINC:30525-0"
-                  title:
-                    description: "A non-standardized, human-readable string to describe the patient variable indicated by this id. The 'title' may be implemented by the PDS to aid in debugging, and clients should not depend on this value. The client should have prior knowledge of the supported patient variables, and thus should provide it's own human-readable titles for representation on any end-user interfaces in the appropriate language."
-                    type: string
-                    example: "Age"
-                  how:
-                    description: "A value such as 'The value was specified by the end user.' indicates that any value in the EHR has been overriden by the client via the input values to the endpoint, and they will be simply passed back here."
-                    type: string
-                    example: "The value was specified by the end user."
-                  why:
-                    description: "Provides the client with a human-readable, non-standard justification for why the plugin needs this particular variable. This can be rendered by the client to provide the end-user with rationale for the patient values, but does not address how the value was computed."
-                    type: string
-                    example: "Age is used to calculate the creatinine clearance. Dosing is lower for geriatric patient and contraindicated for pediatric patients"
-                  variableValue:
-                    description: "The justification id maps to only one PatientVariable, which in turn, defines all the legal values (legalValues) for this id. The legalValues define the type for the variableValue, and so can be used to inform the client on how to render the variableValue. The legalValues field here is optional, so the client can find the type by calling the '/config' endpoint, matching the 'id' with that in this justification schema, and looking up 'legalValues'. The variableValue may also include the 'units' field, which is optional, and if left off, implies the system default units. NOTE: The 'variableValue' is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user."
-                    type: object
-                    example: {"value": "0.5", "units": "years"}
-                  legalValues:
-                    description: "The 'legalValues' will always be present in the '/config' endpoint response and need not be provided to or from the client in the '/guidance' endpoint call. Use the JSON schema, https://json-schema.org/draft/2019-09/json-schema-validation.html. For example, { type: 'string', 'enum': [ 'Gentamicin', 'Amikacin' ] } to define an enumeration,  { 'type': 'number' } for a float, and { 'type': 'number', 'minimum': '0' } for a positive number, and { 'type': 'integer' } for an integer. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user. "
-                    type: string
-                    example: {"type": "number", "minimum": "0"}
-                  timestamp:
-                    type: string
-                    format: date-time
-                    description: "If not specified, assume current time"
-            outputs:
-              type: array
-              items:
-                $ref: '#/components/schemas/Output'
+          items:
+            $ref: '#/components/schemas/Settings'
+        return:
+          type: object
+          items:
+            $ref: '#/components/schemas/Settings'
         cards:
           type: array
           items:
             $ref: '#/components/schemas/Card'
+        specs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Spec'
+        timeout:
+          type: integer
+          description: "Number of milliseconds until time out. Factory system default should be 120000 (2 minutes) for RUO applictions, and only 500ms for clinical."
+        fhir_piid:
+          type: string
+          example: "pdspi-fhir-example"
+          description: "Uniquely identifies the enabled and installed plugin to use for mapper"
+        mapper_piid:
+          type: string
+          example: "pdspi-mapper-example"
+          description: "Uniquely identifies the enabled and installed plugin to use for fhir"
+    Settings:
+      type: object
+      properties:
+        pluginSelectors:
+          description: "Maps the piid to a set of selector values."
+          type: array
+          items:
+            $ref: '#/components/schemas/PluginSelector'
+        modelParameters:
+          description: "Default, typed values for any parameters that might be required by the plugin"
+          type: array
+          items:
+            $ref: '#/components/schemas/PluginParameter'
+        patientVariables:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatientVariable'
+        timestamp:
+          description: "If absent, defaults to current time."
+          type: string
+          format: date-time
+          example: "2019-12-03T13:41:09.942+00:00"
+    PluginSelector:
+      description: "Used for selecting plugins"
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: "The client should have prior knowledge of the full list of selectors available with this version of the mapper. This id is used to determine which selector type is described."
+          example: "FHIR.URI"
+        legalValues:
+          type: object
+          description: "If absent, all values are legal, so treat the value like a string. Use the JSON schema, https://json-schema.org/draft/2019-09/json-schema-validation.html. For example, { type: 'string', 'enum': [ 'Gentamicin', 'Amikacin' ] } to define an enumeration,  { 'type': 'number' } for a float, and { 'type': 'number', 'minimum': '0' } for a positive number, and { 'type': 'integer' } for an integer. Furthermore, a non-standard 'title' can be added in support of a human-readable string for the type's value. This maybe be implemented by the PDS to aid in debugging, however clients should not depend on this value. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user."
+          example: { "type": "string", "enum": [{"value": "urn://cdwh.nctracs.v1", "title": "NCTraCS Carolina Data Warehouse"},{"value": "http://hapi.fhir.org/baseR4"},{"value": "https://open-ic.epic.com/FHIR/api/FHIR/DSTU2"}] }
+        selectorValue:
+          type: string
+          description: "Unique identifier for this type. Stylistically, community standard coding system used for this type will preface the code used, e.g., http://fhir.org or urn://cdwh.nctracs.v1. The title in the example is optional. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user. "
+          example: {"value": "http://hapi.fhir.org/baseR4", "title": "Hapi FHIR base URL"}
+        title:
+          type: string
+          example: "FHIR URI - an URL (locator) or an URN (unique name)"
+          description: "Human-readable name for this selector type."
+    PluginParameter:
+      type: object
+      required:
+        - id
+        - parameterValue
+      properties:
+        id:
+          type: string
+          description: "The id for one of the parameters used by the plugin in question. Parameters are completely defined by the plugin and need not be interchangable with other plugins. The client will have no prior knowledge for plugin parameters."
+          example: "current-time"
+        legalValues:
+          type: string
+          description: "The 'legalValues' will always be present in the '/config' endpoint response and need not be provided to or from the client in the '/guidance' endpoint call. Use the JSON schema, https://json-schema.org/draft/2019-09/json-schema-validation.html. For example, { type: 'string', 'enum': [ 'Gentamicin', 'Amikacin' ] } to define an enumeration,  { 'type': 'number' } for a float, and { 'type': 'number', 'minimum': '0' } for a positive number, and { 'type': 'integer' } for an integer. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user. "
+          example: { "type": "string", "format": "time-stamp" }
+        parameterDescription:
+          type: string
+          description: "Description provided by the plugin. The plugin, not the client, is therefore responsible for converting the descriptions to the appropriate language based on internationalization and personalization preferences."
+          example: "Compute variables relevant to this timestamp."
+        parameterValue:
+          type: string
+          description: "The actual value of the parameter. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user."
+          example: {"value": "2019-09-20T00:00:01Z"}
+        title: 
+          type: string
+          description: "A non-standardized, human-readable string to describe the id. May be implemented by the PDS to aid in debugging, clients should not depend on this value."
+          example: "Current Time"
+    PatientVariable:
+      type: object
+      required:
+        - id
+      description: "The PatientVariable is used to describe required variables, including all the legal values (legalValues) of that variable, and to provide defaults and override values of that variable. The legalValues defines the type for the variableValue, and so the PatientVariable can also be used to inform the client on how to render the variableValue. The 'units' field  is optional, and if left off, implies the system default units."
+      properties:
+        id:
+          type: string
+          description: "The id for one of the patient variables supported by this mapper version. The client has the option of ignoring this variable if it doesn't recognize the id."
+          example: "LOINC:30525-0"
+        certitude:
+          type: integer
+          description: "The certitude of the value, 0 not certain, 1 somewhat certain, 2 certain. Defaults to 0, if absent"
+          example: 2
+        how:
+          type: string
+          description: "A value such as 'The value was specified by the end user.' indicates that any value in the EHR has been overriden by the client via the input values to the endpoint, and they will be simply passed back here."
+          example: "The value was specified by the end user."
+        timestamp:
+          description: "If absent, defaults to current time."
+          type: string
+          format: date-time
+          example: "2019-12-03T13:41:09.942+00:00"
+        title:
+          type: string
+          description: "A non-standardized, human-readable string to describe the id. May be implemented by the mapper to aid in debugging, clients should not depend on this value. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user."
+          example: "Age"
+        variableDescription:
+          type: string
+          description: "Description of the patient variable provided by the plugin. The plugin, not the client, is therefore responsible for converting the descriptions to the appropriate language based on internationalization and personalization preferences. Patient variable descriptions should describe the variable precisely; for example, rather than say simply 'BMI',the variable might be described as 'nearest BMI prior to intervention', or 'comma-delimited list of {BMI,date} objects for the patient with a given study period, as defined by the 'study-start', 'study-end' model parameters' " 
+        variableValue:
+          type: string
+          example: "0.5"
+          description: the actual value of the patient variable. If 'pds-retrieve-datum' then retrieve from patient data warehouse, otherwise use the value as-is
+        legalValues:
+          type: object
+          description: "If absent, all values are legal, so treat the value like a string. Use the JSON schema, https://json-schema.org/draft/2019-09/json-schema-validation.html. For example, { type: 'string', 'enum': [ 'Gentamicin', 'Amikacin' ] } to define an enumeration,  { 'type': 'number' } for a float, and { 'type': 'number', 'minimum': '0' } for a positive number, and { 'type': 'integer' } for an integer. The client should have prior knowledge of the supported patient variables, and thus should provide it's own human-readable titles for representation on any end-user interfaces in the appropriate language. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user. "
+          example: { "type": "number", "minimum": "0" }
+        units:
+          type: string
+          description: "The unit is standard throughout the pds system. It's up to the guidance plugin to make unit conversions as needed by the guidance model, just as it is up to the dashboard to make unit conversions as needed by the end user."
+          example: "years"
     Card:
       type: object
       required:
@@ -519,33 +471,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Link'
-    Output:
-      type: object
-      required:
-        - id
-        - name
-        - data
-        - specs
-      properties:
-        id:
-          type: string
-          example: "oid-1"
-        name:
-          type: string
-          example: "Time-series data"
-        description:
-          type: string
-          example: "Information about time-series data"
-        data:
-          type: array
-          description: "data to be visualized"
-          items:
-            type: object
-        specs:
-          type: array
-          description: "Vega-lite spec used for guidance visualization"
-          items:
-            $ref: '#/components/schemas/Spec'
     Spec:
       type: object
       required:
