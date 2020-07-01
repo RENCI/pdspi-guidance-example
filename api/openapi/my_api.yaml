@@ -286,7 +286,7 @@ components:
           type: string
           example: "pdspi-aminoglycoside-nomogram"
         ptid:
-          description: "The ID of the patient for which guidance is required. If not specified, depend only on userSuppliedPatientVariables"
+          description: "The ID of the patient for which guidance is required. If not specified, PatientVariable values, would need to be supplied by the user."
           type: string
           example: "smart-7321938"
         title:
