@@ -20,7 +20,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Config'
+                $ref: '#/components/schemas/PluginConfig'
               example:
                 {
                     "title": "DOAC variable mapper",
@@ -101,7 +101,7 @@ paths:
                       "action": "Ignoring query parameters"
                       } ]
                   config:
-                    $ref: '#/components/schemas/Config'
+                    $ref: '#/components/schemas/PluginConfig'
         '500':
           description: "Internal Server Error"
           content:
@@ -121,7 +121,7 @@ paths:
                       "action": "Changed plugin from [m] type to 'g'[pdspi-guidance-example] and returning config as-is otherwise"
                       } ]
                   configs:
-                    $ref: '#/components/schemas/Config'
+                    $ref: '#/components/schemas/PluginConfig'
   /guidance:
     post:
       summary: Given a patient ID and a plugin id, return the guidance
@@ -246,7 +246,7 @@ components:
         action:
           type: string
           example: "Arbitrarily chose this FHIR server from those available: (pdspi-fhir-example). Only one FHIR server is available that is also compatible with pdspi-mapper-example"
-    Config:
+    PluginConfig:
       type: object
       required:
         - piid
@@ -255,12 +255,11 @@ components:
         piid:
           type: string
           description: "A string, unique to this deployment, used to identify this plugin in realtime"
-          example: "pdspi-mapper-DOAC"
+          example: "pdspi-aminoglycoside-nomogram"
         title:
           type: string
           description: "Meaningful name for this plugin"
-          example: "DOAC variable mapper"
-        pluginDependencies:
+          example: "pdspi-aminoglycoside-nomogram"
           type: array
           items:
             type: string
@@ -269,19 +268,18 @@ components:
           type: string
           enum: [e,g,m,mD,f,fD]
           description: "A value from the enumeration below identifying the plugin type. 'g'=Guidance, 'c'=convenience, 'm'=mapper, 'f'=FHIR data server, 'mD'= default mapper, 'fD'=default FHIR server. In the clinical arena, only one FHIR server and only one mapper is allowed, and this can be indicated either with the defaults, or by only installing one mapper and one FHIR plugin type."
-          example: "m"
+          example: "g"
         pluginTypeTitle:
           type: string
           description: "A human-readable value for the type. 'g'=Guidance, 'c'=Convenience, 'm'=Mapping, 'f'=FHIR, 'mD'=Default Mapping plugin, 'fD'=Default FHIR plugin"
         settingsDefaults:
             $ref: '#/components/schemas/Settings'
     Guidance:
-      description: "Returns guidance, justification, visualization data and data type, as well as cds-hooks compatible formats for direct integration with the EHR."
+      description: "Guidance, justification, visualization data and data type, as well as cds-hooks compatible formats for direct integration with the EHR."
       type: object
       required:
         - txid
         - inputs
-        - cards
       properties:
         piid:
           description: "A string, uniquely identifies the enabled and installed plugin in this deployment, used to identify this plugin in realtime for retriving guidance."
@@ -300,13 +298,9 @@ components:
           description: "The transaction id sent in the Guidance. If none were sent, a unique id will be created and sent back here."
           example: "38-1"
         inputs:
-          type: object
-          items:
-            $ref: '#/components/schemas/Settings'
+          $ref: '#/components/schemas/Settings'
         return:
-          type: object
-          items:
-            $ref: '#/components/schemas/Settings'
+          $ref: '#/components/schemas/Settings'
         cards:
           description: "Set of suggested actions, per the CDS-Hooks standard"
           type: array
@@ -329,6 +323,7 @@ components:
           type: string
           example: "pdspi-mapper-example"
     Settings:
+      description: "Used for specifying factory defaults, admin over-ride defaults, user-over-ride input values, and ultimately the values that the plugin used."
       type: object
       properties:
         pluginSelectors:
@@ -416,11 +411,6 @@ components:
           type: string
           description: "A value such as 'The value was specified by the end user.' indicates that any value in the EHR has been overriden by the client via the input values to the endpoint, and they will be simply passed back here."
           example: "The value was specified by the end user."
-        timestamp:
-          description: "If absent, defaults to current time."
-          type: string
-          format: date-time
-          example: "2019-12-03T13:41:09.942+00:00"
         title:
           type: string
           description: "A non-standardized, human-readable string to describe the id. May be implemented by the mapper to aid in debugging, clients should not depend on this value. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user."
