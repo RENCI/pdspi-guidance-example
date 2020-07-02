@@ -528,47 +528,115 @@ components:
           description: "A non-standardized, human-readable string to describe the id. May be implemented by the PDS to aid in debugging, clients should not depend on this value."
           example: "Current Time"
     PatientVariable:
+      description: >-
+        Used to specify EHR patient values as well as user-supplied overrides of
+        those EHR values, and/or user-supplied replacements for values missing
+        in the EHR.
       type: object
       required:
         - id
-      description: "The PatientVariable is used to describe required variables, including all the legal values (legalValues) of that variable, and to provide defaults and override values of that variable. The legalValues defines the type for the variableValue, and so the PatientVariable can also be used to inform the client on how to render the variableValue. The 'units' field  is optional, and if left off, implies the system default units."
       properties:
         id:
           type: string
-          description: "The id for one of the patient variables supported by this PDS version. The client has the option of ignoring this variable if it doesn't recognize the id."
-          example: "LOINC:30525-0"
+          description: >-
+            The id for one of the patient variables supported by this PDS
+            version. The client has the option of ignoring this variable if it
+            doesn't recognize the id, but if another plugin requires this variable, 
+            then the user won't have the option of overriding it if the client ignores it.
+            Stylistically, community standard coding system used for this type will 
+            preface the code used, e.g., LOINC:3025-0, ICD10:R53, HP:0000819, rxCUI:1596450, etc.
+          example: 'LOINC:30525-0'
         certitude:
           type: integer
-          description: "The certitude of the value, 0 not certain, 1 somewhat certain, 2 certain. Defaults to 0, if absent"
+          description: >-
+            The certitude of the value, 0 not certain, 1 somewhat certain, 2
+            certain. User-supplied values will always be '2' to avoid personal 
+            bias in reporting certitude, with the assumption that human error 
+            will be intercepted, and human intelligence overrides algorithm outputs.
           example: 2
-        how:
-          type: string
-          description: "A value such as 'The value was specified by the end user.' indicates that any value in the EHR has been overriden by the client via the input values to the endpoint, and they will be simply passed back here."
-          example: "The value was specified by the end user."
-        title:
-          type: string
-          description: "A non-standardized, human-readable string to describe the id. May be implemented by the mapper to aid in debugging, clients should not depend on this value. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user."
-          example: "Age"
         variableDescription:
           type: string
-          description: "Description of the patient variable provided by the plugin. The plugin, not the client, is therefore responsible for converting the descriptions to the appropriate language based on internationalization and personalization preferences. Patient variable descriptions should describe the variable precisely; for example, rather than say simply 'BMI',the variable might be described as 'nearest BMI prior to intervention', or 'comma-delimited list of {BMI,date} objects for the patient with a given study period, as defined by the 'study-start', 'study-end' model parameters' " 
-        variableValue:
+          description: >-
+            Description of the patient variable can optionally be set by the plugin. Patient
+            variable descriptions should describe the variable precisely; for
+            example, rather than say simply 'BMI',the variable might be
+            described as 'nearest BMI prior to intervention', or
+            'comma-delimited list of {BMI,date} objects for the patient with a
+            given study period, as defined by the 'study-start', 'study-end'
+            model parameters'. The comprehensive list of supported patient variables is tied to
+            the PDS release. 
+          example: "The age is determined by subtracting the birthdate from the current time. Also known as 'chronological age' or 'Post Natal Age' (PNA). Specified as somen fraction of years, convention."
+        how:
           type: string
-          example: "0.5"
-          description: the actual value of the patient variable. If 'pds-retrieve-datum' then retrieve from patient data warehouse, otherwise use the value as-is
-        legalValues:
+          description: >-
+            A value of 'The value was specified by the end user.' indicates
+            that the EHR value (whether or not it was missing in the EHR)
+            has been overriden by the client.
+          example: The value was specified by the end user.
+        title:
+          type: string
+          description: >-
+            A non-standardized, human-readable string to describe the id. May be
+            implemented by the PDS to aid in debugging, clients should not
+            depend on this value.
+          example: Age
+        variableValue:
+          description: >-
+            The type for the variableValue is defined by the legalValues, and thus is
+            the client informed on how to render the variableValue. The
+            variableValue may also include the 'units' field, which is optional,
+            and if left off, implies the system default units. It's up to the
+            guidance plugin to make unit conversions as needed by the guidance
+            model, just as it is up to the dashboard to make unit conversions as
+            needed by the end user. NOTE: The 'variableValue' is actually an object 
+            type, but we use 'string' here to overcome a shortcoming of the swagger 
+            ui. This design choice was made in order to prioritize a better 
+            interactive documentation experience for the API user.
           type: object
-          description: "If absent, all values are legal, so treat the value like a string. Use the JSON schema, https://json-schema.org/draft/2019-09/json-schema-validation.html. For example, { type: 'string', 'enum': [ 'Gentamicin', 'Amikacin' ] } to define an enumeration,  { 'type': 'number' } for a float, and { 'type': 'number', 'minimum': '0' } for a positive number, and { 'type': 'integer' } for an integer. The client should have prior knowledge of the supported patient variables, and thus should provide it's own human-readable titles for representation on any end-user interfaces in the appropriate language. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user. "
-          example: { "type": "number", "minimum": "0" }
+          example:
+            value: '0.5'
+            units: years
+        why:
+          type: string
+          description: >-
+            Provides the client with a human-readable, non-standard
+            justification for why the plugin needs this particular variable.
+            This can be rendered by the client to provide the end-user with
+            rationale for the patient values, but does not address how the value
+            was computed.
+          example: >-
+            Age is used to calculate the creatinine clearance. Dosing is lower
+            for geriatric patient and contraindicated for pediatric patients
+        legalValues:
+          type: string
+          description: >-
+            If absent, all values are legal, so treat the value like a string.
+            Use the JSON schema,
+            https://json-schema.org/draft/2019-09/json-schema-validation.html.
+            For example, { type: 'string', 'enum': [ 'Gentamicin', 'Amikacin' ]
+            } to define an enumeration,  { 'type': 'number' } for a float, and {
+            'type': 'number', 'minimum': '0' } for a positive number, and {
+            'type': 'integer' } for an integer. NOTE: This value is
+            actually an object type, but we use 'string' here to overcome a
+            shortcoming of the swagger ui. This design choice was made in order
+            to prioritize a better interactive documentation experience for the
+            API user. 
+          example:
+            type: number
+            minimum: '0'
+        group:
+            type: string
+            description: >-
+              A 'tag' for grouping semantically similar variables. Used to inform
+              the client on how to render many patient variables, e.g., 'Symptom', 
+              'Profile', 'Pre-existing condition'. Can be safely ignored by client.
+            example: "Patient variable"
         timestamp:
           type: string
-          description: "The time used to compute the patient variable. For example, this could be the current time if a patient is presenting for treatment, or in a retrospective study, it could be an intervention date, or any date within the retrospective study timeframe."
+          description: >-
+            The time used to compute the patient variable. For example, this could be the current time if a patient is presenting for treatment, or in a retrospective study, it could be an intervention date, or any date within the retrospective study timeframe.
           format: date-time
           example: "2020-07-01T14:29:15.453Z"
-        units:
-          type: string
-          description: "The unit is standard throughout the pds system. It's up to the guidance plugin to make unit conversions as needed by the guidance model, just as it is up to the dashboard to make unit conversions as needed by the end user."
-          example: "years"
     Card:
       type: object
       required:
