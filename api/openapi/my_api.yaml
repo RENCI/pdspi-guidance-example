@@ -503,30 +503,68 @@ components:
           description: "Human-readable name for this selector type."
     PluginParameter:
       type: object
+      description: Used for specifying factory defaults, admin over-ride defaults,
+        user-over-ride input values, and ultimately the values that the plugin
+        will use, or reports as having used, to parameterize models.
       required:
         - id
         - parameterValue
       properties:
         id:
           type: string
-          description: "The id for one of the parameters used by the plugin in question. Parameters are completely defined by the plugin and need not be interchangable with other plugins. The client will have no prior knowledge for plugin parameters."
-          example: "current-time"
-        legalValues:
+          description: >-
+            The id for one of the parameters used by the plugin in question.
+            Parameters are completely defined by the plugin and need not be
+            interchangable with other plugins. The client will have no prior
+            knowledge for plugin parameters.
+          example: 'pdspi-guidance-example:1'
+        title:
           type: string
-          description: "The 'legalValues' will always be present in the '/config' endpoint response and need not be provided to or from the client in the '/guidance' endpoint call. Use the JSON schema, https://json-schema.org/draft/2019-09/json-schema-validation.html. For example, { type: 'string', 'enum': [ 'Gentamicin', 'Amikacin' ] } to define an enumeration,  { 'type': 'number' } for a float, and { 'type': 'number', 'minimum': '0' } for a positive number, and { 'type': 'integer' } for an integer. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user. "
-          example: { "type": "string", "format": "time-stamp" }
+          description: >-
+            A non-standardized, human-readable string to describe the id. May be
+            implemented by the PDS to aid in debugging, clients should not
+            depend on this value.
+          example: Extended interval nomogram
         parameterDescription:
           type: string
-          description: "Description provided by the plugin. The plugin, not the client, is therefore responsible for converting the descriptions to the appropriate language based on internationalization and personalization preferences."
-          example: "Compute variables relevant to this timestamp."
+          description: >-
+            A precise description of the parameter, provided by the plugin requiring
+            the parameter. This description can be served by the client to  guide the
+            user in overriding default parameter values. Plugins should consider using
+            a message catalog to hold parameterDescription strings in order to 
+            facilitate internationalization.
+          example: >-
+            This calculator uses one of four extended-interval nomograms. Please
+            choose one nomogram.
         parameterValue:
-          type: string
-          description: "The actual value of the parameter. NOTE: This value is actually an object type, but we use 'string' here to overcome a shortcoming of the swagger ui. This design choice was made in order to prioritize a better interactive documentation experience for the API user."
-          example: {"value": "2019-09-20T00:00:01Z"}
-        title: 
-          type: string
-          description: "A non-standardized, human-readable string to describe the id. May be implemented by the PDS to aid in debugging, clients should not depend on this value."
-          example: "Current Time"
+          type: object
+          description: >-
+            The actual value of the parameter. NOTE: This value is actually an object type, but
+            we use 'string' here to overcome a shortcoming of the swagger ui.
+            This design choice was made in order to prioritize a better
+            interactive documentation experience for the API user.
+          example:
+            value: Hartford
+        legalValues:
+          type: object
+          description: >-
+            If absent, all values are legal, so treat the value like a string.
+            Use the JSON schema,
+            https://json-schema.org/draft/2019-09/json-schema-validation.html.
+            For example, { type: 'string', 'enum': [ 'Gentamicin', 'Amikacin' ]
+            } to define an enumeration,  { 'type': 'number' } for a float, and {
+            'type': 'number', 'minimum': '0' } for a positive number, and {
+            'type': 'integer' } for an integer. NOTE: This value is actually an
+            object type, but we use 'string' here to overcome a shortcoming of
+            the swagger ui. This design choice was made in order to prioritize a
+            better interactive documentation experience for the API user. 
+          example:
+            type: string
+            enum:
+              - Hartford
+              - Urban-Craig
+              - Conventional A
+              - Conventional B
     PatientVariable:
       description: >-
         Used to specify EHR patient values as well as user-supplied overrides of
