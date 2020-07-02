@@ -20,7 +20,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PluginConfig'
+                $ref: '#/components/schemas/Config'
               example:
                 {
                     "title": "DOAC variable mapper",
@@ -101,7 +101,7 @@ paths:
                       "action": "Ignoring query parameters"
                       } ]
                   config:
-                    $ref: '#/components/schemas/PluginConfig'
+                    $ref: '#/components/schemas/Config'
         '500':
           description: "Internal Server Error"
           content:
@@ -121,7 +121,7 @@ paths:
                       "action": "Changed plugin from [m] type to 'g'[pdspi-guidance-example] and returning config as-is otherwise"
                       } ]
                   configs:
-                    $ref: '#/components/schemas/PluginConfig'
+                    $ref: '#/components/schemas/Config'
   /guidance:
     post:
       summary: Given a patient ID and a plugin id, return the guidance
@@ -246,7 +246,7 @@ components:
         action:
           type: string
           example: "Arbitrarily chose this FHIR server from those available: (pdspi-fhir-example). Only one FHIR server is available that is also compatible with pdspi-mapper-example"
-    PluginConfig:
+    Config:
       type: object
       required:
         - piid
@@ -254,26 +254,60 @@ components:
       properties:
         piid:
           type: string
-          description: "A string, unique to this deployment, used to identify this plugin in realtime"
-          example: "pdspi-aminoglycoside-nomogram"
+          description: >-
+            A string, unique to this deployment, used to identify this plugin in
+            realtime
+          example: pdspi-mapper-DOAC
         title:
           type: string
-          description: "Meaningful name for this plugin"
-          example: "pdspi-aminoglycoside-nomogram"
+          description: Meaningful name for this plugin
+          example: DOAC variable mapper
+        enabled:
+          type: boolean
+          description: >-
+            Admin can 'disable' this plugin, and if so, prevent it from being
+            chosen on any client or dashboard.
+          example: true 
+        pluginDependencies:
           type: array
           items:
             type: string
-            description: "An array of container names upon which the plugin in question depends. For example, 'txscience/pds-fhir-example:0.2.0'. Mapper plugins must indicate a dependency on one or more FHIR plugins, but dependencies are discouraged otherwise in order to maintain the decoupling and reuse of plugins. Every plugin of type 'm' and 'mD' must have at least one 'f' or 'fD' plugin listed in pluginDependencies, otherwise return 500."
+            description: >-
+              An array of container names upon which the plugin in question
+              depends. For example, 'txscience/pds-fhir-example:0.2.0'. Mapper
+              plugins must indicate a dependency on one or more FHIR plugins,
+              but dependencies are discouraged otherwise in order to maintain
+              the decoupling and reuse of plugins. Every plugin of type 'm' and
+              'mD' must have at least one 'f' or 'fD' plugin listed in
+              pluginDependencies, otherwise return 500.
         pluginType:
           type: string
-          enum: [e,g,m,mD,f,fD]
-          description: "A value from the enumeration below identifying the plugin type. 'g'=Guidance, 'c'=convenience, 'm'=mapper, 'f'=FHIR data server, 'mD'= default mapper, 'fD'=default FHIR server. In the clinical arena, only one FHIR server and only one mapper is allowed, and this can be indicated either with the defaults, or by only installing one mapper and one FHIR plugin type."
-          example: "g"
+          enum:
+            - g
+            - m
+            - f
+            - fD
+            - mD
+          description: >-
+            A value identifying the plugin type. 
+            'g'=Guidance, 'c'=Convenience, 'm'=Mapper, 'f'=FHIR, 'mD'= Default Mapper, 'fD'=Default FHIR. In 
+            the clinical arena, only one FHIR server and only one mapper is 
+            allowed, and this can be indicated either with the defaults, or by 
+            only installing one mapper and one FHIR plugin type.
+          example: m
         pluginTypeTitle:
           type: string
-          description: "A human-readable value for the type. 'g'=Guidance, 'c'=Convenience, 'm'=Mapping, 'f'=FHIR, 'mD'=Default Mapping plugin, 'fD'=Default FHIR plugin"
+          enum:
+            - Guidance
+            - Mapper
+            - FHIR
+            - Default FHIR
+            - Default Mapper
+          description: >-
+            A human-readable value for the type. 'g'=Guidance, 'c'=Convenience, 
+            'm'=Mapper, 'f'=FHIR, 'mD'=Default Mapper, 'fD'=Default FHIR
         settingsDefaults:
-            $ref: '#/components/schemas/Settings'
+          $ref: '#/components/schemas/Settings'
     Guidance:
       description: "Guidance, justification, visualization data and data type, as well as cds-hooks compatible formats for direct integration with the EHR."
       type: object
