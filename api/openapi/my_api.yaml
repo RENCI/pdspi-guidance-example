@@ -309,53 +309,74 @@ components:
         settingsDefaults:
           $ref: '#/components/schemas/Settings'
     Guidance:
-      description: "Guidance, justification, visualization data and data type, as well as cds-hooks compatible formats for direct integration with the EHR."
+      description: >-
+        Guidance, justification, visualization data and data type, as well as
+        cds-hooks compatible formats for direct integration with the EHR.
       type: object
       required:
-        - txid
+        - piid
         - inputs
       properties:
         piid:
-          description: "A string, uniquely identifies the enabled and installed plugin in this deployment, used to identify this plugin in realtime for retriving guidance."
           type: string
-          example: "pdspi-aminoglycoside-nomogram"
-        ptid:
-          description: "The ID of the patient for which guidance is required. If not specified, PatientVariable values, would need to be supplied by the user."
-          type: string
-          example: "smart-7321938"
+          example: pdspi-aminoglycoside-nomogram
+          description: >-
+            A string, uniquely identifies the enabled and installed plugin in
+            this deployment, used to identify this plugin in realtime for
+            retriving guidance. Note the dashboard client only needs access to
+            patient variables required by the installed/enabled plugins, and the
+            guidance plugin data access is restricted even further to only what
+            is neeed for guidance based on the selectors (need-to-know access to
+            patient data).
         title:
-          description: "An optional title for the guidance plugin"
+          description: An optional title for the guidance plugin
           type: string
-          example: "Aminoglycoside dosing guidance"
+          example: Aminoglycoside dosing guidance
         txid:
           type: string
-          description: "The transaction id sent in the Guidance. If none were sent, a unique id will be created and sent back here."
-          example: "38-1"
+          description: >-
+            The transaction id sent in the Guidance. If none were sent, a unique id will be created and sent back here
+          example: 38-1
+        ptid:
+          description: >-
+            The ID of the patient for which guidance is required. If not
+            specified, depend only on the 'variableValue' in 'PatientVariable', which is part of 'inputs'
+          type: string
+          example: smart-7321938
         inputs:
           $ref: '#/components/schemas/Settings'
         return:
           $ref: '#/components/schemas/Settings'
         cards:
-          description: "Set of suggested actions, per the CDS-Hooks standard"
           type: array
+          description: 'Set of suggested actions, per the CDS-Hooks standard'
           items:
             $ref: '#/components/schemas/Card'
         specs:
-          description: "Vega-lite spec used for guidance visualization"
           type: array
+          description: Vega-lite spec used for guidance visualization
           items:
             $ref: '#/components/schemas/Spec'
         timeout:
-          description: "Number of milliseconds until time out. Factory system default should be 120000 (2 minutes) for RUO applictions, and only 500ms for clinical."
           type: integer
+          description: >-
+            Number of milliseconds until time out. A reasonable factory system default is
+            120000 (2 minutes) for RUO applictions, and only 500ms for
+            clinical.
         fhir_piid:
-          description: "Uniquely identifies the enabled and installed plugin to use for mapper"
           type: string
-          example: "pdspi-fhir-example"
+          example: pdspi-fhir-example
+          description: >-
+            Uniquely identifies an enabled FHIR server plugin which is
+            compatible with the named mapper plugin. If not specified, the PDS
+            will use the default server.
         mapper_piid:
-          description: "Uniquely identifies the enabled and installed plugin to use for fhir"
           type: string
-          example: "pdspi-mapper-example"
+          example: pdspi-mapper-example
+          description: >-
+            Uniquely identifies an enabled mapper plugin to use for mapping FHIR
+            resources to variables that are relevant to the guidance plugin. If
+            not specified, PDS will use the default mapper.
     Settings:
       description: "Used for specifying factory defaults, admin over-ride defaults, user-over-ride input values, and ultimately the values that the plugin used."
       type: object
