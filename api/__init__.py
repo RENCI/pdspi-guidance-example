@@ -13,39 +13,41 @@ config = {
     "title": "Aminoglycoside dosing guidance",
     "piid": "pdspi-guidance-example",
     "pluginType": "g",
-    "pluginSelectors": [ {
-        "title": "Drug",
-        "id": "dosing.rxCUI",
-        "selectorValue": {
-            "value": "rxCUI:1596450",
-            "title": "Gentamicin"
-        }
-    } ],
-    "pluginParameterDefaults": [ {
-        "id": "pdspi-guidance-example:1",
-        "title": "Extended interval nomogram",
-        "parameterDescription": "This calculator uses one of four extended-interval nomograms. Please choose one nomogram.",
-        "parameterValue": { "value": "Hartford" },
-        "legalValues": {
-            "type": "string",
-            "enum": [ "Hartford", "Urban-Craig", "Conventional A", "Conventional B" ] }
-    } ],
-    "requiredPatientVariables": [ {
-        "id": "LOINC:30525-0",
-        "title": "Age",
-        "legalValues": { "type": "number", "minimum": "0" },
-        "why": "Age is used to calculate the creatinine clearance. Dosing is lower for geriatric patient and contraindicated for pediatric patients"
-    }, {
-        "id": "LOINC:29463-7",
-        "title": "Weight",
-        "legalValues": { "type": "number", "minimum": "0" },
-        "why": "Weight is used to calculate the creatinine clearance. Dosing is higher for patients with higher weight"
-    }, {
-        "id": "LOINC:39156-5",
-        "title": "BMI",
-        "legalValues": { "type": "number", "minimum": "0" },
-        "why": "BMI is used to calculate the creatinine clearance. Dosing is higher for patients with higher BMI"
-    }]
+    "settingsDefaults": {
+        "pluginSelectors": [ {
+            "title": "Drug",
+            "id": "dosing.rxCUI",
+            "selectorValue": {
+                "value": "rxCUI:1596450",
+                "title": "Gentamicin"
+            }
+        } ],
+        "patientVariables": [ {
+            "id": "LOINC:30525-0",
+            "title": "Age",
+            "legalValues": { "type": "number", "minimum": "0" },
+            "why": "Age is used to calculate the creatinine clearance. Dosing is lower for geriatric patient and contraindicated for pediatric patients"
+        }, {
+            "id": "LOINC:29463-7",
+            "title": "Weight",
+            "legalValues": { "type": "number", "minimum": "0" },
+            "why": "Weight is used to calculate the creatinine clearance. Dosing is higher for patients with higher weight"
+        }, {
+            "id": "LOINC:39156-5",
+            "title": "BMI",
+            "legalValues": { "type": "number", "minimum": "0" },
+            "why": "BMI is used to calculate the creatinine clearance. Dosing is higher for patients with higher BMI"
+        }],
+        "modelParameters": [ {
+            "id": "pdspi-guidance-example:1",
+            "title": "Extended interval nomogram",
+            "parameterDescription": "This calculator uses one of four extended-interval nomograms. Please choose one nomogram.",
+            "parameterValue": { "value": "Hartford" },
+            "legalValues": {
+                "type": "string",
+                "enum": [ "Hartford", "Urban-Craig", "Conventional A", "Conventional B" ] }
+        } ]
+    }
 }
 
 
@@ -183,13 +185,13 @@ def get_config():
 
 def get_guidance(body):
     def extract(var, attr):
-        return var.get(attr, next(filter(lambda rpv: rpv["id"] == var["id"], config["requiredPatientVariables"]))[attr])
+        return var.get(attr, next(filter(lambda rpv: rpv["id"] == var["id"], config["settingsDefaults"]["patientVariables"]))[attr])
 
     inputs = []
     age = None
     weight = None
     bmi = None
-    for var in body["userSuppliedPatientVariables"]:
+    for var in body['settings_requested']["patientVariables"]:
         if var['id'] == 'LOINC:30525-0':
             age = var["variableValue"]['value']
         elif var['id'] == 'LOINC:29463-7':
@@ -207,8 +209,6 @@ def get_guidance(body):
         })
     return {
         **guidance,
-        "justification": {
-            "inputs": inputs,
-            "outputs": generate_vis_outputs(age=age, weight=weight, bmi=bmi)
-        }
+        "settings_used": {'patientVariables': inputs},
+        "advanced": generate_vis_outputs(age=age, weight=weight, bmi=bmi)
     }
