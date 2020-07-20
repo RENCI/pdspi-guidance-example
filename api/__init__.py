@@ -2,7 +2,7 @@ import os
 import requests
 
 from api.utils import generate_time_series_data, generate_multi_time_series_data, generate_scatter_plot_data, \
-    generate_multi_scatter_plot_data, generate_histogram_data, generate_dosing_data
+    generate_multi_scatter_plot_data, generate_histogram_data, generate_dosing_data, generate_dosing_inputs
 
 
 pds_host = os.getenv("PDS_HOST", "localhost")
@@ -115,7 +115,7 @@ def generate_vis_spec(typeid, x_axis_title, y_axis_title, chart_title, chart_des
         return {}
 
 
-def generate_vis_outputs(age=None, weight=None, bmi=None):
+def generate_vis_outputs(age=None, weight=None, bmi=None, dose=None, tau=None, num_cycles=None):
     outputs = [
         {
             "id": "oid-1",
@@ -169,7 +169,8 @@ def generate_vis_outputs(age=None, weight=None, bmi=None):
             "id": "oid-6",
             "name": "Dosing data",
             "description": "Information about dosing data",
-            "data": generate_dosing_data(p_age=age, p_weight=weight, p_bmi=bmi),
+            "data": generate_dosing_data(p_age=age, p_weight=weight, p_bmi=bmi, dose=dose, tau=tau,
+                                         num_cycles=num_cycles),
             "specs": [
                 generate_vis_spec("dosing_plot", "Time (hours)", "Concentration (mcg/mL)", "Plot of dosing data",
                                   "Plot of Aminoglycoside concentration graph over time")
@@ -191,6 +192,32 @@ def get_guidance(body):
     age = None
     weight = None
     bmi = None
+    dose = None
+    tau = None
+    num_cycles = None
+    for var in body['settings_requested']['modelParameters']:
+        if var['id'] == 'dose':
+            dose = var['parameterValue']['value']
+            min = int(var['legalValues']['minimum'])
+            max = int(var['legalValues']['maximum'])
+            if dose < min or dose > max:
+                return {'error': 'input dose is not in valid range'}
+        elif var['id'] == 'tau':
+            tau = var['parameterValue']['value']
+            min = int(var['legalValues']['minimum'])
+            max = int(var['legalValues']['maximum'])
+            if tau < min or tau > max:
+                return {'error': 'input tau is not in valid range'}
+        elif var['id'] == 'num_cycles':
+            num_cycles = var['parameterValue']['value']
+            min = int(var['legalValues']['minimum'])
+            max = int(var['legalValues']['maximum'])
+            if num_cycles < min or num_cycles > max:
+                return {'error': 'input num of cycles is not in valid range'}
+
+    input_dose, input_tau, input_num_cycles, ret_input = generate_dosing_inputs(dose=dose,
+                                                                                tau=tau,
+                                                                                num_cycles=num_cycles)
     for var in body['settings_requested']["patientVariables"]:
         if var['id'] == 'LOINC:30525-0':
             age = var["variableValue"]['value']
@@ -209,6 +236,8 @@ def get_guidance(body):
         })
     return {
         **guidance,
-        "settings_used": {'patientVariables': inputs},
-        "advanced": generate_vis_outputs(age=age, weight=weight, bmi=bmi)
+        "settings_used": {'patientVariables': inputs,
+                          'modelParameters': ret_input},
+        "advanced": generate_vis_outputs(age=age, weight=weight, bmi=bmi, dose=input_dose, tau=input_tau,
+                                         num_cycles=input_num_cycles)
     }

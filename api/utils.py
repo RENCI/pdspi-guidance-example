@@ -84,7 +84,38 @@ def generate_histogram_data(n):
     return data
 
 
-def generate_dosing_data(p_age=None, p_weight=None, p_bmi=None):
+def generate_dosing_inputs(dose=None, tau=None, num_cycles=None):
+    if not dose:
+        dose = _get_random(120, 240)
+    if not tau:
+        tau = int(_get_random(8, 16))
+    if not num_cycles:
+        num_cycles = int(_get_random(4, 8))
+    ret_input = [{
+        "id": "dose",
+        "title": "dose",
+        "parameterDescription": "dose in mg unit for computing concentration graph",
+        "parameterValue": {"value": dose},
+        "legalValues": {"type": "number", "minimum": "120", "maximum": "240"}
+    },
+        {
+            "id": "tau",
+            "title": "frequency",
+            "parameterDescription": "dose frequency in hour unit for computing concentration graph",
+            "parameterValue": {"value": tau},
+            "legalValues": {"type": "number", "minimum": "8", "maximum": "16"}
+        },
+        {
+            "id": "num_cycles",
+            "title": "Number of cycles",
+            "parameterDescription": "number of cycles in concentration graph",
+            "parameterValue": {"value": num_cycles},
+            "legalValues": {"type": "number", "minimum": "4", "maximum": "8"}
+        }]
+    return dose, tau, num_cycles, ret_input
+
+
+def generate_dosing_data(p_age=None, p_weight=None, p_bmi=None, dose=None, tau=None, num_cycles=None):
     pds_host = os.getenv("PDS_HOST", "localhost")
     pds_port = os.getenv("PDS_PORT", "8080")
     pds_version = os.getenv("PDS_VERSION", "v1")
@@ -95,22 +126,30 @@ def generate_dosing_data(p_age=None, p_weight=None, p_bmi=None):
 
     if p_weight:
         vd = 0.3 * float(p_weight)
+    elif p_bmi:
+        weight = float(p_bmi) * 1.7 ** 2
+        vd = 0.3 * weight
     else:
         vd = _get_random(22, 25)
 
     if p_weight and p_age:
         crcl = ((140 - float(p_age)) * float(p_weight))/(72 * 1.56)
+    elif p_bmi and p_age:
+        weight = float(p_bmi) * 1.7 ** 2
+        crcl = ((140 - float(p_age)) * weight) / (72 * 1.56)
     else:
         crcl = _get_random(29.3516, 63.4812)
     seed()
+    input_dose, input_tau, input_num_cycles, _ = generate_dosing_inputs(dose=dose, tau=tau, num_cycles=num_cycles)
     post_input = {
-        "dose": _get_random(120, 240),
-        "tau": int(_get_random(8, 16)),
+        "dose": input_dose,
+        "tau": input_tau,
         "crcl":  crcl,
         "t_infusion": 0.5,
         "vd": vd,
-        "num_cycles": int(_get_random(4, 8))
+        "num_cycles": input_num_cycles
     }
+
     url_str = "http://{}:{}/{}/plugin/tx-generator-dosing/concentration_data".format(pds_host, pds_port, pds_version)
     resp = requests.post(url_str, headers=json_post_headers, json=post_input)
     if resp.status_code == 200:
