@@ -46,7 +46,28 @@ config = {
             "legalValues": {
                 "type": "string",
                 "enum": [ "Hartford", "Urban-Craig", "Conventional A", "Conventional B" ] }
-        } ]
+        },
+        {
+            "id": "oid-6:dose",
+            "title": "dose",
+            "parameterDescription": "dose in mg unit for computing concentration graph",
+            "parameterValue": {"value": 180},
+            "legalValues": {"type": "number", "minimum": "120", "maximum": "240"}
+        },
+        {
+            "id": "oid-6:tau",
+            "title": "frequency",
+            "parameterDescription": "dose frequency in hour unit for computing concentration graph",
+            "parameterValue": {"value": 12},
+            "legalValues": {"type": "number", "minimum": "8", "maximum": "16"}
+        },
+        {
+            "id": "oid-6:num_cycles",
+            "title": "Number of cycles",
+            "parameterDescription": "number of cycles in concentration graph",
+            "parameterValue": {"value": 6},
+            "legalValues": {"type": "number", "minimum": "4", "maximum": "8"}
+        }]
     }
 }
 
@@ -196,19 +217,19 @@ def get_guidance(body):
     tau = None
     num_cycles = None
     for var in body['settings_requested']['modelParameters']:
-        if var['id'] == 'dose':
+        if var['id'] == 'oid-6:dose':
             dose = var['parameterValue']['value']
             min = int(var['legalValues']['minimum'])
             max = int(var['legalValues']['maximum'])
             if dose < min or dose > max:
                 return {'error': 'input dose is not in valid range'}
-        elif var['id'] == 'tau':
+        elif var['id'] == 'oid-6:tau':
             tau = var['parameterValue']['value']
             min = int(var['legalValues']['minimum'])
             max = int(var['legalValues']['maximum'])
             if tau < min or tau > max:
                 return {'error': 'input tau is not in valid range'}
-        elif var['id'] == 'num_cycles':
+        elif var['id'] == 'oid-6:num_cycles':
             num_cycles = var['parameterValue']['value']
             min = int(var['legalValues']['minimum'])
             max = int(var['legalValues']['maximum'])
@@ -236,6 +257,7 @@ def get_guidance(body):
         })
     return {
         **guidance,
+        "settings_requested": body['settings_requested'],
         "settings_used": {'patientVariables': inputs,
                           'modelParameters': ret_input},
         "advanced": generate_vis_outputs(age=age, weight=weight, bmi=bmi, dose=input_dose, tau=input_tau,

@@ -33,6 +33,27 @@ config = {
             "legalValues": {
                 "type": "string",
                 "enum": [ "Hartford", "Urban-Craig", "Conventional A", "Conventional B" ] }
+        },
+        {
+            "id": "oid-6:dose",
+            "title": "dose",
+            "parameterDescription": "dose in mg unit for computing concentration graph",
+            "parameterValue": {"value": 180},
+            "legalValues": {"type": "number", "minimum": "120", "maximum": "240"}
+        },
+        {
+            "id": "oid-6:tau",
+            "title": "frequency",
+            "parameterDescription": "dose frequency in hour unit for computing concentration graph",
+            "parameterValue": {"value": 12},
+            "legalValues": {"type": "number", "minimum": "8", "maximum": "16"}
+        },
+        {
+            "id": "oid-6:num_cycles",
+            "title": "Number of cycles",
+            "parameterDescription": "number of cycles in concentration graph",
+            "parameterValue": {"value": 6},
+            "legalValues": {"type": "number", "minimum": "4", "maximum": "8"}
         } ],
         "patientVariables": [ {
             "id": "LOINC:30525-0",
@@ -52,86 +73,6 @@ config = {
         }]
     }
 }
-
-
-guidance = {
-    "piid": "pdspi-guidance-example",
-    "title": "Aminoglycoside dosing guidance",
-    "txid": "38-1",
-    "settings_used": {
-        "timestamp": "2019-12-03T13:41:09.942+00:00",
-        "patientVariables": [ {
-            "id": "LOINC:30525-0",
-            "title": "Age",
-            "how": "The value was specified by the end user.",
-            "why": "Age is used to calculate the creatinine clearance. Dosing is lower for geriatric patient and contraindicated for pediatric patients",
-            "variableValue": {
-                "value": "0.5",
-                "units": "years"
-            },
-            "legalValues": {
-                "type": "number",
-                "minimum": "0"
-            }
-        }, {
-            "how": "The value was specified by the end user.",
-            "id": "LOINC:39156-5",
-            "title": "BMI",
-            "legalValues": { "type": "number", "minimum": "0" },
-            "why": "BMI is used to calculate the creatinine clearance. Dosing is higher for patients with higher BMI",
-            "variableValue": {
-                "value": "0.5",
-                "units": "kg/m^2"
-            }
-        } ]
-    },
-    "advanced": [
-        {
-            "id": "oid-1",
-            "name": "Time-series data",
-            "description": "Information about time-series data",
-            "data": [],
-            "specs": []
-        }
-    ],
-    "cards": [
-        {
-            "id": "string",
-            "title": "string",
-            "summary": "some <140 char Summary Message",
-            "detail": "some sort of optional GitHub Markdown details",
-            "indicator": "info",
-            "source": {
-                "label": "Human-readable source label",
-                "url": "https://example.com",
-                "icon": "https://example.com/img/icon-100px.png"
-            },
-            "suggestions": [
-                {
-                    "uuid": "e1187895-ad57-4ff7-a1f1-ccf954b2fe46",
-                    "label": "Human-readable suggestion label",
-                    "actions": [
-                        {
-                            "type": "create",
-                            "description": "Create a prescription for Acetaminophen 250 MG",
-                            "resource": "MedicationRequest"
-                        }
-                    ]
-                }
-            ],
-            "selectionBehavior": "string",
-            "links": [
-                {
-                    "label": "SMART Example App",
-                    "url": "string",
-                    "type": "string",
-                    "appContext": "string"
-                }
-            ]
-        }
-    ]
-}
-
 
 guidance_input = {
     "piid": "pdspi-guidance-example",
@@ -173,6 +114,7 @@ def test_guidance():
     assert "title" in resp_output
     assert "advanced" in resp_output
     assert "settings_used" in resp_output
+    assert "settings_requested" in resp_output
     assert "cards" in resp_output
     for output in resp_output['advanced']:
         assert "data" in output
