@@ -216,7 +216,7 @@ def get_guidance(body):
     dose = None
     tau = None
     num_cycles = None
-    for var in body['settings_requested']['modelParameters']:
+    for var in body['settingsRequested']['modelParameters']:
         if var['id'] == 'oid-6:dose':
             dose = var['parameterValue']['value']
             min = int(var['legalValues']['minimum'])
@@ -239,7 +239,7 @@ def get_guidance(body):
     input_dose, input_tau, input_num_cycles, ret_input = generate_dosing_inputs(dose=dose,
                                                                                 tau=tau,
                                                                                 num_cycles=num_cycles)
-    for var in body['settings_requested']["patientVariables"]:
+    for var in body['settingsRequested']["patientVariables"]:
         if var['id'] == 'LOINC:30525-0':
             age = var["variableValue"]['value']
         elif var['id'] == 'LOINC:29463-7':
@@ -257,8 +257,8 @@ def get_guidance(body):
         })
     return {
         **guidance,
-        "settings_requested": body['settings_requested'],
-        "settings_used": {'patientVariables': inputs,
+        "settingsRequested": body['settingsRequested'],
+        "settingsUsed": {'patientVariables': inputs,
                           'modelParameters': ret_input},
         "advanced": generate_vis_outputs(age=age, weight=weight, bmi=bmi, dose=input_dose, tau=input_tau,
                                          num_cycles=input_num_cycles)
