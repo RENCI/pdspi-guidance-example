@@ -217,22 +217,23 @@ def get_guidance(body):
     tau = None
     num_cycles = None
     for var in body['settingsRequested']['modelParameters']:
+        lvals = extract(var, "legalValues")
         if var['id'] == 'oid-6:dose':
             dose = var['parameterValue']['value']
-            min = int(var['legalValues']['minimum'])
-            max = int(var['legalValues']['maximum'])
+            min = int(lvals['minimum'])
+            max = int(lvals['maximum'])
             if dose < min or dose > max:
                 return {'error': 'input dose is not in valid range'}
         elif var['id'] == 'oid-6:tau':
             tau = var['parameterValue']['value']
-            min = int(var['legalValues']['minimum'])
-            max = int(var['legalValues']['maximum'])
+            min = int(lvals['minimum'])
+            max = int(lvals['maximum'])
             if tau < min or tau > max:
                 return {'error': 'input tau is not in valid range'}
         elif var['id'] == 'oid-6:num_cycles':
             num_cycles = var['parameterValue']['value']
-            min = int(var['legalValues']['minimum'])
-            max = int(var['legalValues']['maximum'])
+            min = int(lvals['minimum'])
+            max = int(lvals['maximum'])
             if num_cycles < min or num_cycles > max:
                 return {'error': 'input num of cycles is not in valid range'}
 
