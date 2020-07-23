@@ -206,8 +206,8 @@ def get_config():
 
 
 def get_guidance(body):
-    def extract(var, attr):
-        return var.get(attr, next(filter(lambda rpv: rpv["id"] == var["id"], config["settingsDefaults"]["patientVariables"]))[attr])
+    def extract(var, attr, type="patientVariables"):
+        return var.get(attr, next(filter(lambda rpv: rpv["id"] == var["id"], config["settingsDefaults"][type]))[attr])
 
     inputs = []
     age = None
@@ -217,20 +217,22 @@ def get_guidance(body):
     tau = None
     num_cycles = None
     for var in body['settingsRequested']['modelParameters']:
-        lvals = extract(var, "legalValues")
         if var['id'] == 'oid-6:dose':
+            lvals = extract(var, "legalValues", type="modelParameters")
             dose = var['parameterValue']['value']
             min = int(lvals['minimum'])
             max = int(lvals['maximum'])
             if dose < min or dose > max:
                 return {'error': 'input dose is not in valid range'}
         elif var['id'] == 'oid-6:tau':
+            lvals = extract(var, "legalValues", type="modelParameters")
             tau = var['parameterValue']['value']
             min = int(lvals['minimum'])
             max = int(lvals['maximum'])
             if tau < min or tau > max:
                 return {'error': 'input tau is not in valid range'}
         elif var['id'] == 'oid-6:num_cycles':
+            lvals = extract(var, "legalValues", type="modelParameters")
             num_cycles = var['parameterValue']['value']
             min = int(lvals['minimum'])
             max = int(lvals['maximum'])
