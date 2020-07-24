@@ -36,22 +36,22 @@ config = {
         },
         {
             "id": "oid-6:dose",
-            "title": "dose",
-            "parameterDescription": "dose in mg unit for computing concentration graph",
+            "title": "Dose",
+            "parameterDescription": "Dose in mg unit for computing concentration graph",
             "parameterValue": {"value": 180},
             "legalValues": {"type": "number", "minimum": "120", "maximum": "240"}
         },
         {
             "id": "oid-6:tau",
-            "title": "frequency",
-            "parameterDescription": "dose frequency in hour unit for computing concentration graph",
+            "title": "Frequency",
+            "parameterDescription": "Dose frequency in hour unit for computing concentration graph",
             "parameterValue": {"value": 12},
             "legalValues": {"type": "number", "minimum": "8", "maximum": "16"}
         },
         {
             "id": "oid-6:num_cycles",
             "title": "Number of cycles",
-            "parameterDescription": "number of cycles in concentration graph",
+            "parameterDescription": "Number of cycles in concentration graph",
             "parameterValue": {"value": 6},
             "legalValues": {"type": "number", "minimum": "4", "maximum": "8"}
         } ],
