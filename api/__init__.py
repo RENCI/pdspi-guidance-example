@@ -216,32 +216,37 @@ def get_guidance(body):
     dose = None
     tau = None
     num_cycles = None
-    for var in body['settingsRequested']['modelParameters']:
-        if var['id'] == 'oid-6:dose':
-            lvals = extract(var, "legalValues", type="modelParameters")
-            dose = var['parameterValue']['value']
-            min = int(lvals['minimum'])
-            max = int(lvals['maximum'])
-            if dose < min or dose > max:
-                return {'error': 'input dose is not in valid range'}
-        elif var['id'] == 'oid-6:tau':
-            lvals = extract(var, "legalValues", type="modelParameters")
-            tau = var['parameterValue']['value']
-            min = int(lvals['minimum'])
-            max = int(lvals['maximum'])
-            if tau < min or tau > max:
-                return {'error': 'input tau is not in valid range'}
-        elif var['id'] == 'oid-6:num_cycles':
-            lvals = extract(var, "legalValues", type="modelParameters")
-            num_cycles = var['parameterValue']['value']
-            min = int(lvals['minimum'])
-            max = int(lvals['maximum'])
-            if num_cycles < min or num_cycles > max:
-                return {'error': 'input num of cycles is not in valid range'}
+    ret_input = {}
+    input_dose = None
+    input_tau = None
+    input_num_cycles = None
+    if 'settingsRequested' in body and 'modelParameters' in body['settingsRequested']:
+        for var in body['settingsRequested']['modelParameters']:
+            if var['id'] == 'oid-6:dose':
+                lvals = extract(var, "legalValues", type="modelParameters")
+                dose = var['parameterValue']['value']
+                min = int(lvals['minimum'])
+                max = int(lvals['maximum'])
+                if dose < min or dose > max:
+                    return {'error': 'input dose is not in valid range'}
+            elif var['id'] == 'oid-6:tau':
+                lvals = extract(var, "legalValues", type="modelParameters")
+                tau = var['parameterValue']['value']
+                min = int(lvals['minimum'])
+                max = int(lvals['maximum'])
+                if tau < min or tau > max:
+                    return {'error': 'input tau is not in valid range'}
+            elif var['id'] == 'oid-6:num_cycles':
+                lvals = extract(var, "legalValues", type="modelParameters")
+                num_cycles = var['parameterValue']['value']
+                min = int(lvals['minimum'])
+                max = int(lvals['maximum'])
+                if num_cycles < min or num_cycles > max:
+                    return {'error': 'input num of cycles is not in valid range'}
 
-    input_dose, input_tau, input_num_cycles, ret_input = generate_dosing_inputs(dose=dose,
-                                                                                tau=tau,
-                                                                                num_cycles=num_cycles)
+        input_dose, input_tau, input_num_cycles, ret_input = generate_dosing_inputs(dose=dose,
+                                                                                    tau=tau,
+                                                                                    num_cycles=num_cycles)
     for var in body['settingsRequested']["patientVariables"]:
         if var['id'] == 'LOINC:30525-0':
             age = var["variableValue"]['value']
