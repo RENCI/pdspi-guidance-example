@@ -130,44 +130,48 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Guidance'
-            example:
-              {  "piid": "pdspi-guidance-example",
-                 "ptid": "38",
-                 "settingsRequested": {
-                   "timestamp": "2019-12-03T13:41:09.942+00:00",
-                   "modelParameters": [ {
-                                          "id": "pdspi-guidance-example:1",
-                                          "title": "Extended interval nomogram",
-                                          "parameterDescription": "This calculator uses one of four extended-interval nomograms. Please choose one nomogram.",
-                                          "parameterValue": { "value": "Hartford" }
-                                        } ],
-                   "patientVariables": [       {
-                                                 "id": "LOINC:30525-0",
-                                                 "title": "Age",
-                                                 "variableValue": {
-                                                   "value": "0.5",
-                                                   "units": "years"
-                                                 },
-                                                 "how": "The value was specified by the end user."
-                                               }, {
-                                                 "id": "LOINC:39156-5",
-                                                 "title": "BMI",
-                                                 "variableValue": {
-                                                   "value": "0.5",
-                                                   "units": "kg/m^2"
-                                                 },
-                                                 "how": "The value was specified by the end user."
-                                               } ]
-                 }
-              }
+              type: array
+              items:
+                $ref: '#/components/schemas/Guidance'
+              example:
+                [{  "piid": "pdspi-guidance-example",
+                   "patientId": "38",
+                   "settingsRequested": {
+                     "timestamp": "2019-12-03T13:41:09.942+00:00",
+                     "modelParameters": [ {
+                                            "id": "pdspi-guidance-example:1",
+                                            "title": "Extended interval nomogram",
+                                            "parameterDescription": "This calculator uses one of four extended-interval nomograms. Please choose one nomogram.",
+                                            "parameterValue": { "value": "Hartford" }
+                                          } ],
+                     "patientVariables": [       {
+                                                   "id": "LOINC:30525-0",
+                                                   "title": "Age",
+                                                   "variableValue": {
+                                                     "value": "0.5",
+                                                     "units": "years"
+                                                   },
+                                                   "how": "The value was specified by the end user."
+                                                 }, {
+                                                   "id": "LOINC:39156-5",
+                                                   "title": "BMI",
+                                                   "variableValue": {
+                                                     "value": "0.5",
+                                                     "units": "kg/m^2"
+                                                   },
+                                                   "how": "The value was specified by the end user."
+                                                 } ]
+                   }
+                }]
       responses:
         '200':
           description: "Guidance matching query"
           content: 
             application/json:
               schema:
-                  $ref: '#/components/schemas/Guidance'
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Guidance'
         '400':
           description: "Bad Request"
           content: 
@@ -362,7 +366,7 @@ components:
           description: >-
             The transaction id sent in the Guidance. If none were sent, a unique id will be created and sent back here
           example: 38-1
-        ptid:
+        patientId:
           description: >-
             The ID of the patient for which guidance is required. If not
             specified, depend only on the 'variableValue' in 'PatientVariable', which is part of 'inputs'
